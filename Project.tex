@@ -83,6 +83,8 @@ A dissertation submitted in partial fulfillment of the requirements for the degr
 finding and conclusions of the dissertation.  The abstract should normally be fewer than 350 words.
 
 
+One of the most widely used parallel programming models today is MapReduce. MapReduce is easy both to learn and use, and is especially useful in analyzing large datasets. While it is not suitable for several classes of scientific computing operations that are better served by message-passing interface or OpenMP, such as numerical linear algebra or finite element and finite difference computations, MapReduce's utility in workflows frequently called “big data” has made it a mainstay in high performance computing. This chapter introduces the MapReduce programming model and the Hadoop open-source framework which supports it.
+
 Big data is concern massive amount, complex, growing data set from multiple autonomous sources. It has to deal with large
 and complex dataset that can be structured, semi-structured or unstructured and will typically not fit into memory to be processed.
 MapReduce is a programming model for processing large datasets distributed on a large clusters.A rapid growth of data in recent time,
@@ -150,9 +152,48 @@ Structured data is usually stored and managed in relational databases with prede
  
 Unstructured data, in contrast, has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL.
 
+\chapter{MapReduce Framework}
+
+At present, with data being generated at an exponential rate, there is the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. To handle such problem, Google developed the MapReduce programming model for distributed computing based on the Java language [5].
+
+\section{Concept of MapReduce}
+
+There are multiple approaches for processing relatively smaller datasets, however larger datasets require a different approach specifically for data that is too big to fit in memory. The traditional approach to process data on a single machine is to break data into individual chunks which is then loaded and processed sequentially on the machine. 
+
+MapReduce is a processing technique/programming model for distributed computing based on Java. It is designed to process large datasets using the same splitting approach by breaking down the dataset into independent chunks. But instead of processing the chunks sequentially, the chunks are processed in parallel on a collective group of computers known as a cluster. The results of the individual chunks are then aggregated and returned as output.\\
+
+\includegraphics[width=8cm]{keyvalue} \\
+
+The algorithm operates on key-value pairs, which means that it takes a set of input key-value pairs and produces a set of output key-value pairs. In addition, the user is required to specify two functions for the Mapper and Reducer. The Mapper takes the input and produce the intermediate key-value pairs which is passed to the Reducer to create a set of output key-value pairs. The Reducer combines all the values associated with each key to create a smaller set of values. This enables us to input data that may be too large to fit in standard memory.\\
+
+In the simplest form of the MapReduce model, the user only specifies the Map function. In this case, the output will consist of the intermediate key-value pairs which is ordered by the keys. 
+
+\section{The MapReduce Process}
+
+The complete process typically consists of four operations namely, splitting, mapping, shuffling and reducing.\\
+
+1. Splitting - the process will first break and divide the input data into fixed independent chunks which is passed to the map procedure. The default size of each chunk is 64MB, however this can be adjusted by the user. \\
+
+2. Mapping - the purpose of the mapper is to process the input data. In this phase, data in each chunk is passed to a user specified map function and returns output in the form of key-value pairs. For example, if a file contains 100 lines to be processed, 100 mappers can run together to process one record each or if 50 mappers can run together to process two lines each. The Hadoop framework decides how many mappers to allocate based on the size of the data and the memory block available on each mapper server.\\
+
+3. Shuffling - the process by which the intermediate output from the mappers is transferred to the reducer. The intermediate output is sorted automatically by key. key-value pairs which may contain 1 or more keys.
+
+4. Reducing - In this phase, the output values from shuffling are aggregated. This should combine values from the intermediate values and return a single output value for each key. In other words, this operation is a summary of the complete dataset.
+
+\section{Examples}
+
+
+
+\section{Advantages of MapReduce}
+
+The main advantage of MapReduce is that it is highly scalable. This is due to the ability to process large data sets across multiple computer nodes. These servers can be inexpensive and can also operate in parallel. This simple scalability is what attracts many to utilize the MapReduce model.
+
+Other advantages include cost efficiency, security and authentication, parallel processing, availability, resilient and simple.
+
+
 \chapter{The Hadoop Framework}
 
-At present, with data being generated at an exponential rate, there is the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. To handle such problem, Google introduced the MapReduce model for distributed computing based on Java. This system is implemented through Apache Hadoop which is an open source software framework. This framework offers reliable, scalable, parallel and distributed computing scaling up from a single server to a network of multiple computers[4]. Apache Hadoop was developed with the purpose of having a data store that allow organisations to leverage big data analytics with cost efficiency in mind.\\
+Hadoop is Apache's free and open-source implementation of the MapReduce framework. Apache Hadoop offers reliable, scalable, parallel and distributed computing scaling up from a single server to a network of multiple computers[4]. It was developed with the purpose of having a data store that allow organisations to leverage big data analytics with cost efficiency in mind.\\
 
 %There are two main components of the Hadoop Framework: Storage and Processing
 
@@ -176,11 +217,7 @@ The main advantages of HDFS is data locality and fault tolerance. Data locality 
 
 \section{Processing - MapReduce}
 
-The processing component of the Hadoop architecture is know as MapReduce based on Java. MapReduce is used to process and analyse large data sets in parallel on a collective group of computers known as a cluster. In a MapReduce job, the input is broken down into multiple chunks which are processed by the map phase and then the output of the map phase is passed as input to the reduce phase. The input and output files are stored in the file system, while the output of the map phase (known as intermediate results) are only stored temporarily in the process.\\
-
-The MapReduce framework operates on key-value pairs, which means that that the input to each phase are pairs of keys and values associated with its key. In addition, the user is also required to specify two scripts/functions: the mapper and the reducer. As the process runs in parallel, the reduce task on specific nodes may begin once its map tasks is complete rather than waiting on all map tasks to complete. \\
-
-\includegraphics[width=8cm]{keyvalue}
+In a MapReduce job, the input is broken down into multiple chunks which are processed by the map phase and then the output of the map phase is passed as input to the reduce phase. The input and output files are stored in the file system, while the output of the map phase (known as intermediate results) are only stored temporarily in the process. As the process runs in parallel, the reduce task on specific nodes may begin once its map tasks is complete rather than waiting on all map tasks to complete.\\
 
 Similar to HDFS, the MapReduce process also utilises the master/slave architecture in which the JobTracker runs on the master node while the TaskTracker runs on each slave node. \\
 
@@ -232,111 +269,137 @@ For both the mapper and the reducer, first entry of the line is the key followed
 4. Faster Conversion - it takes very little time to convert data from one format to another using Hadoop streaming especially when the input and output formats are specified.\\
 5. Testing - input and output data can be tested quickly by using it with Unix or command line tools.
 
-\chapter{MapReduce Framework}
+\chapter{HMR Hadoop MapReduce Package for R}
 
-We have already identified that MapReduce is a software framework and programming model in the Hadoop Architecture which is used for processing large amounts of data. It it based on Java but also has the capability to run in languages other than JAVA through the Hadoop streaming utility. Let us know explore how the MapReduce process works.
+HMR is a package developed in R which acts as an interface which give R users the ability to execute Hadoop Map/Reduce jobs. It is highly efficient as it utilise chunk-wise processing as well as automated conversion to and from R objects. This allows users to feed existing R code to Hadoop with ease. There are other packages in R which uses the traditional key-value operations such as the rmr2 package.
 
-The complete process typically consists of four operations namely, splitting, mapping, shuffling and reducing.\\
+\section{Functions in iotools}
 
-1. Splitting - the process will first break and divide the input data into fixed independent chunks which is passed to the map procedure. The default size of each chunk is 64MB, however this can be adjusted by the user. \\
+HMR is highly efficient as it leverages the iotools package in R. It is a set of tools for quickly importing and processing datasets using any data source. The functions packaged in iotools are comparatively faster than the native functions in R as well as other packages such as bigmemory, readr, foreach, etc. 
 
-2. Mapping - the purpose of the mapper is to process the input data. In this phase, data in each chunk is passed to a user specified map function and returns output in the form of key-value pairs. For example, if a file contains 100 lines to be processed, 100 mappers can run together to process one record each or if 50 mappers can run together to process two lines each. The Hadoop framework decides how many mappers to allocate based on the size of the data and the memory block available on each mapper server.\\
+The two functions chunk.reader and read.chunk are functions used in the HMR package. chunk.reader essentially converts a binary connection into chunks stored as an object in R while preserving the integrity of the lines. On the other hand, chunk.read converts this object into a raw vector for each subsequent chunk. The efficiency comes from the use of binary data and raw objects in R which allow fast chunk-wise processing. 
 
-3. Shuffling - the process by which the intermediate output from the mappers is transferred to the reducer. The intermediate output is sorted automatically by key. key-value pairs which may contain 1 or more keys 
-
-4. Reducing - 
+Other core functions in the iotools package used in the HMR package are mstrsplit and dstrsplit. It takes either a raw or character vector and splits it into a matrix or data frame in R with the specified separator. These functions are able to minimize the copying of data and avoid the use of intermediate strings to improve performance.
 
 
+\section{Current Approach}
 
+HMR can take two types of input objects: hpath and hinput. Hpath only contains the path of the input whereas hinput has an additional formatter argument which allows the user to specify the class of the input variables as a vector or a list. This will require the user to have some familiarity or knowledge of structure of the data. If no list or vector is specified for the formatter, then HMR defaults to the default formatter which uses the mstrsplit function with tab as the key separator and $\mid$ as the the column separator. With the default formatter, the class of the variables are in the string/character format which is highly inefficient. If separate formatters are required, the formatter can be a list with the entries map and/or reduce specifying the corresponding formatter function.
 
-Here we will learn what is sorting in Hadoop, what is shuffling in Hadoop, what is the purpose of Shuffling and sorting phase in MapReduce, how MapReduce shuffle works and how MapReduce sort works. 
-
-
+The problem with the default formatter is that it is highly inefficient to read in data as string/characters also it will require more coding in the map and reduce functions in order to read and process the data. 
 
 
 
+\chapter{Package Enhancement - Automating Formatters}
+
+The idea of this project is to make the HMR package more user-friendly while retaining efficiency. If we can automatically detect the format of the input data for both the map and reduce stage, then it makes it a lot easier to write the formatter functions. 
+
+\section{New Approaches}
+
+The enhancement provides automatic detection of the formatter for the mapper and the reducer instead of requiring the user to specify the formatters. The additional argument in the HMR function is autoformatter which is set to TRUE for dynamic detection, FALSE for static approach and defaults to NULL if the user wish to specify their own formatters in the function.
+
+\subsection{Dynamic Approach}
+
+The dynamic approach does the detection of the formatter during the MapReduce process. It is a function called coltypes which takes the split chunks in the form of raw vectors and returns a character vector containing the class of each attribute in the dataset. 
+
+advantages: each chunk may vary, 
+disadvantage: no header
+
+\begin{verbatim}
+  ## dynamic approach
+  coltypes <- function(r, sep=formsep, nsep='\t', 
+                       nrowsClasses=25L, chunksize=size, header=TRUE) {
+    if (sum(r==10) < nrowsClasses) {
+      nrowsClasses = sum(r==10)
+      r <- r[1:chunksize]
+      r <- r[1:tail(which(r==10),1)]
+    }
+    subset = mstrsplit(r, sep=sep, nsep=nsep, 
+    			nrows=nrowsClasses, skip=header)
+    colClasses = apply(subset, 2, function(x) 
+    				class(type.convert(x, as.is=TRUE)))
+    if (header) {
+      col_names = mstrsplit(r, sep=sep, nsep=nsep, nrows=1)
+      if ((length(col_names) - 1 == length(colClasses)) && !is.na(nsep))
+        col_names = col_names[-1]
+      names(colClasses) = col_names
+    }
+    colClasses
+  }
+\end{verbatim}
+
+\subsection{Static Approach}
+
+The static approach also detects the formatters but instead of running on each chunk of data, it reads an allocated chunk size starting from the top of the dataset. The chunk size can be specified by the user, however the default is set at 1 million bytes. Then it calls the same coltypes function on this allocated chunk of data to return the character vector containing the class of each attribute in the dataset.
+
+The risk with this approach is data may be incomplete, i.e. may be logical due to missing values. More suitable for known structure.
+
+\begin{verbatim}
+  ## new static approach
+  guess <- function(path, chunksize=size, header=TRUE, map) {
+    f <- pipe(paste("hadoop fs -cat", shQuote(path)), "rb")
+    cr <- chunk.reader(f)
+    r <- read.chunk(cr, chunksize)
+    colClasses = coltypes(r)
+    close(f)
+    if (!missing(map)) {
+      m = map(dstrsplit(r, colClasses, sep=formsep, skip=header))
+      c = coltypes(as.output(m), header=FALSE)
+      if (length(c) == length(names(m)))
+        names(c) = names(m)
+      rm(list=c("cr", "r", "f"))
+      list(map=function(x) dstrsplit(x, colClasses, 
+      	sep=formsep, skip=header), 
+           reduce=function(x) dstrsplit(x, c, sep="|", 
+           	nsep="\t", skip=FALSE))
+    }
+    else function(x) dstrsplit(x, colClasses, sep=formsep, skip=header)
+  }
+  \end{verbatim}
+
+\section{Formatter Logic}
+
+\begin{verbatim}
+  ## formatter logic
+  map.formatter <- NULL
+  red.formatter <- NULL
+  if (!missing(formatter)) {
+    if (is.list(formatter)) {
+      map.formatter <- formatter$map
+      red.formatter <- formatter$reduce
+    } 
+    else map.formatter <- red.formatter <- formatter
+  }
+  else {
+    if (missing(autoformatter)) {
+      if (inherits(input, "hinput"))
+        map.formatter <- attr(input, "formatter")
+      if (is.null(map.formatter)) map.formatter <- .default.formatter
+      if (is.null(red.formatter)) red.formatter <- .default.formatter
+    }
+    else {
+      if (isTRUE(autoformatter)) {
+        map.formatter <- function(x) dstrsplit(x, coltypes(x), 
+        	sep=formsep, skip=TRUE)
+        if (!missing(reduce)) 
+          red.formatter <- function(x) dstrsplit(x, 
+          	coltypes(x, header=FALSE), nsep='\t')
+      }
+      else if (autoformatter==FALSE) {
+        if (!missing(reduce)) {
+          formatter <- guess(paste0(input,"/*"), map=map)
+          map.formatter <- formatter$map
+          red.formatter <- formatter$reduce
+        }
+        else map.formatter <- guess(paste0(input,"/*"))
+      }
+    }
+  }
+  \end{verbatim}
 
 
 
-
-One map task is created for each split which then executes map function for each record in the split.
-It is always beneficial to have multiple splits because the time taken to process a split is small as compared to the time taken for processing of the whole input. When the splits are smaller, the processing is better to load balanced since we are processing the splits in parallel.
-However, it is also not desirable to have splits too small in size. When splits are too small, the overload of managing the splits and map task creation begins to dominate the total job execution time.
-For most jobs, it is better to make a split size equal to the size of an HDFS block (which is 64 MB, by default).
-Execution of map tasks results into writing output to a local disk on the respective node and not to HDFS.
-Reason for choosing local disk over HDFS is, to avoid replication which takes place in case of HDFS store operation.
-Map output is intermediate output which is processed by reduce tasks to produce the final output.
-Once the job is complete, the map output can be thrown away. So, storing it in HDFS with replication becomes overkill.
-In the event of node failure, before the map output is consumed by the reduce task, Hadoop reruns the map task on another node and re-creates the map output.
-Reduce task doesn't work on the concept of data locality. An output of every map task is fed to the reduce task. Map output is transferred to the machine where reduce task is running.
-On this machine, the output is merged and then passed to the user-defined reduce function.
-Unlike the map output, reduce output is stored in HDFS (the first replica is stored on the local node and other replicas are stored on off-rack nodes). So, writing the reduce output
-
-
- By default, the MapReduce framework gets input datasets from HDFS22, 23. It is
-not necessary that Map and Reduce tasks proceed in a sequential manner i.e., reduce tasks can begin as soon as any
-of the Map task completes its assigned work. It is also not necessary that all Map tasks completes before any reduce
-tasks starts working. MapReduce works on key-value pairs. Conceptually, a MapReduce task takes input data set as
-key-value pair and gives output in the form of key-value pair only by processing input data sets through MapReduce
-phases. Output generated by the Map phase is called intermediate results which are given as an input to reduce phase
-as shown in Fig. 5.
- 
-
-This is the very first phase in the execution of map-reduce program. In this phase data in each split is passed to a mapping function to produce output values. In our example, a job of mapping phase is to count a number of occurrences of each word from input splits (more details about input-split is given below) and prepare a list in the form of <word, frequency>
-
-The map or mapper’s job is to process the input data. Generally the input data is in the form of file or directory and is stored in the Hadoop file system (HDFS). The input file is passed to the mapper function line by line. The mapper processes the data and creates several small chunks of data.
-
-
-The major advantage of MapReduce is that it is easy to scale data processing over multiple computing nodes. Under the MapReduce model, the data processing primitives are called mappers and reducers. Decomposing a data processing application into mappers and reducers is sometimes nontrivial. But, once we write an application in the MapReduce form, scaling the application to run over hundreds, thousands, or even tens of thousands of machines in a cluster is merely a configuration change. This simple scalability is what has attracted many programmers to use the MapReduce model.
-
-
-A MapReduce program is composed of a map procedure, which performs filtering and sorting (such as sorting students by first name into queues, one queue for each name), and a reduce method, which performs a summary operation (such as counting the number of students in each queue, yielding name frequencies). The "MapReduce System" (also called "infrastructure" or "framework") orchestrates the processing by marshalling the distributed servers, running the various tasks in parallel, managing all communications and data transfers between the various parts of the system, and providing for redundancy and fault tolerance.
-
-The model is a specialization of the split-apply-combine strategy for data analysis.[4] It is inspired by the map and reduce functions commonly used in functional programming,[5] although their purpose in the MapReduce framework is not the same as in their original forms.[6] The key contributions of the MapReduce framework are not the actual map and reduce functions (which, for example, resemble the 1995 Message Passing Interface standard's[7] reduce[8] and scatter[9] operations), but the scalability and fault-tolerance achieved for a variety of applications by optimizing the execution engine[citation needed]. As such, a single-threaded implementation of MapReduce is usually not faster than a traditional (non-MapReduce) implementation; any gains are usually only seen with multi-threaded implementations on multi-processor hardware.[10] The use of this model is beneficial only when the optimized distributed shuffle operation (which reduces network communication cost) and fault tolerance features of the MapReduce framework come into play. Optimizing the communication cost is essential to a good MapReduce algorithm.[11]
-
-MapReduce libraries have been written in many programming languages, with different levels of optimization. A popular open-source implementation that has support for distributed shuffles is part of Apache Hadoop. The name MapReduce originally referred to the proprietary Google technology, but has since been genericized. By 2014, Google was no longer using MapReduce as their primary big data processing model,[12] and development on Apache Mahout had moved on to more capable and less disk-oriented mechanisms that incorporated full map and reduce capabilities.[13]
-
-
-
-A MapReduce job generally breaks and divides the input data into chunks which are first processed by “Map
-phase” in parallel and then by “Reduce phase” 19, 20, 21. Hadoop framework sorts out the output of the Map phase 
-
-which are then given as an input to Reduce phase to initiate parallel reduce tasks as shown in Fig. 4. These input and
-output files are stored in file system. By default, the MapReduce framework gets input datasets from HDFS22, 23. It is
-not necessary that Map and Reduce tasks proceed in a sequential manner i.e., reduce tasks can begin as soon as any
-of the Map task completes its assigned work. It is also not necessary that all Map tasks completes before any reduce
-tasks starts working. MapReduce works on key-value pairs. Conceptually, a MapReduce task takes input data set as
-key-value pair and gives output in the form of key-value pair only by processing input data sets through MapReduce
-phases. Output generated by the Map phase is called intermediate results which are given as an input to reduce phase
-as shown in Fig. 5.
-
-
-MapReduce is a programming model and an associated implementation for processing and generating large
-data sets. Users specify a map function that processes a
-key/value pair to generate a set of intermediate key/value
-pairs, and a reduce function that merges all intermediate
-values associated with the same intermediate key. Many
-real world tasks are expressible in this model, as shown
-in the paper.
-Programs written in this functional style are automatically parallelized and executed on a large cluster of commodity machines. The run-time system takes care of the
-details of partitioning the input data, scheduling the program’s execution across a set of machines, handling machine failures, and managing the required inter-machine
-communication. This allows programmers without any
-experience with parallel and distributed systems to easily utilize the resources of a large distributed system.
-Our implementation of MapReduce runs on a large
-cluster of commodity machines and is highly scalable:
-a typical MapReduce computation processes many terabytes of data on thousands of machines. Programmers
-find the system easy to use: hundreds of MapReduce programs have been implemented and upwards of one thousand MapReduce jobs are executed on Google’s clusters
-every day.
-
-\chapter{Leveraging iotools}
-
-
-
-\chapter{HMR Package}
-
-
-
-\chapter{Formatters}
+\section{Examples}
 
 
 
@@ -363,7 +426,7 @@ mathematical formulae using latex typesetting.
 
 
 
-\section{References}
+\chapter{References}
 1. BIG DATA: Challenges and opportunities, Infosys Lab Briefings,
 Vol 11 No 1, 2013. \\
 
@@ -377,6 +440,9 @@ Mohd Rehan Ghazi, Durgaprasad Gangodkar, 2015
 
 5. MapReduce: Simplified Data Processing on Large Clusters, 
 Jeffrey Dean and Sanjay Ghemawat
+
+6. iotools: High-Performance I/O Tools for R, 
+Taylor Arnold, Michael J. Kane, and Simon Urbanek
 
 
 \end{document}
