@@ -319,7 +319,7 @@ Let us now explore how Hadoop streaming works.\\
 
 The first part of the Hadoop streaming process involves the Input Format which defines the input specifications for the MapReduce Job. The Input Format is the class which selects the file from HDFS that should be input to the map function. It is responsible for the split on the input data so that the data can be correctly assigned to the mappers. The data is divided into blocks (typically 64/128mb) in HDFS which is the assigned to the mappers for further processing. We know that the Inputs and Outputs for the map and reduce functions are key-value pairs separated by a tab character. Hence the Input Format is also responsible for converting the data into the key-value pairs for the mapper. This is called the RecordReader. Another benefit of using Hadoop streaming is that the user can specify their own formatter for the input and output using another language. 
 
-\subsection{Mapper & Reducer}
+\subsection{Mapper \& Reducer}
 
 Mappers and Reducers are the Hadoop servers that run the Map and Reduce functions respectively. 
 
