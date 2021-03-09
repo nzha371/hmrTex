@@ -1,3 +1,5 @@
+% !TEX TS-program = make
+
 % --------------------------------------------------------------------------------------
 %                   LATEX TEMPLATE FOR DISSERTATION (HONS)
 % --------------------------------------------------------------------------------------
@@ -152,11 +154,30 @@ Veracity is the quality of the data. Information may be volatile or incomplete s
 
 \section{Structure of Big Data} 
 
-Big data can be categorised as structured or unstructured.\\
+Big data can be categorised as unstructured or structured.\\
  
-Structured data is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with structured data include customer information, sales transactions, airline reservations systems, and billing systems. This type of structured data within relational databases can be accessed using Structured Query language (SQL).\\
+Unstructured data has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL.
+
+Structured data, in contrast, is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with structured data include customer information, sales transactions, airline reservations systems, and billing systems. This type of structured data within relational databases can be accessed using Structured Query language (SQL).\\
  
-Unstructured data, in contrast, has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL.
+ \section{Challenges around Unstructured Data}
+ 
+There is a challenge in managing unstructured data due to the fact that many organisation collect significantly larger concentrations of unstructured information. This can be quite difficult and expensive to explore. Often structured data is created from unstructured data through various processing methods. By converting to structured data, the data can be universally understood by the ordinary user, easily digestible by data programs as well as having the ability to transfer to other data tools.
+
+When converting from unstructured data to structured data, the questions we often ask is what data do we wish to extract, is it a word count index or is it a particular feature, topic or sentiment? Then we want to explore what the structure look like. Is it key value pairs, JSON, XML, or Tabular? In the processing, we analyse the data and retrieve a structured metadata that augments the original data source. The alternative is to extract and clean the data if we already know what features we wish to extract. 
+
+1.     Identifying a Use Case
+
+Identifying the problem you are trying to solve is the first step of any successful data-driven initiative. This might be identifying the root cause of decreasing employee productivity or optimizing the sales process. Instead of mining information from terabytes of emails, call records, and documents, identify the information exchanges that are likely to contain key data about the sales process or employees’ performance.
+
+2.     Mining Value from Unstructured Data
+
+Just having access to relevant unstructured data is not enough. Enterprises must have the ability to extract data trapped within emails, customer calls, scanned documents, spreadsheets, and other types of unstructured sources. To achieve this, businesses need a data extraction tool with optical character recognition (OCR) and report mining capabilities that can automatically identify and extract meaningful information for faster decision-making.
+
+
+There are certainly tools that provide efficient report mining, text parsing, and OCR capabilities, the challenge, however, remains in integrating unstructured data with existing information systems.
+
+To get their head around unstructured data and use it to validate assumptions and support decision-making, businesses need a tool that can improve and automate their ability to extract unstructured data, as well as integrate it with databases, enterprise applications, and visualization tools. Finding an ideal data extraction solution may require some time and effort, but it will allow businesses to consolidate structured and unstructured data and give it a clear purpose beyond marketing and IT, for a more customer-focused approach across the organization.
 
 \chapter{MapReduce Framework}
 
@@ -224,9 +245,23 @@ The Hadoop system can be set up via cloud or locally. The cluster we will be run
 
 The storage component of the Hadoop architecture is known as the Hadoop Distributed File System (HDFS). The NameNode runs on the master node and manages metadata about the file system in a file named fsimage. This metadata is cached in main memory to provide faster access to the clients on read/write requests. The NameNode controls also manages the slaves by splitting files into chunks (default 64 megabytes) and distributing them across each DataNode in the cluster. The DataNodes are primary storage elements of HDFS where chunks of data are stored and replicated according to the instructions from the NameNode. Secondary NameNode is to periodically read the file system, log changes and applying them to the fsimage file. This will enable the NameNode to boot faster.\\
 
-The main advantages of HDFS is data locality and fault tolerance. Data locality allow the nodes to manipulate the data they have access to which results in faster and more efficient processing while handling faults through the process of replicating files across each slave node[4].\\
+The main advantages of HDFS is data locality and fault tolerance. Data locality allow the nodes to manipulate the data they have access to which results in faster and more efficient processing while handling faults through the process of replicating files across each slave node[4]. \\
 
 \includegraphics[width=8cm]{hdfs}
+
+\section{Fault Tolerance in HDFS}
+
+Suppose the user stores a file XYZ. HDFS will break this file into blocks, say A, B, and C. Let’s assume there are four DataNodes, say D1, D2, D3, and D4. HDFS creates replicas of each block and stores them on different nodes to achieve fault tolerance. For each original block, there will be two replicas stored on different nodes.
+
+\includegraphics[width=8cm]{faulttol}
+
+Let the block A be stored on DataNodes D1, D2, and D4, block B stored on DataNodes D2, D3, and D4, and block C stored on DataNodes D1, D2, and D3.
+
+If DataNode D1 fails, the blocks A and C present in D1 are still available to the user from DataNodes (D2, D4 for A) and (D2, D3 for C).
+
+Hence when one node breaks down, there won't be data lost. 
+
+%insert diagram
 
 \section{Processing - MapReduce}
 
@@ -239,6 +274,16 @@ Similar to HDFS, the MapReduce process also utilises the master/slave architectu
 The JobTracker monitors the MapReduce tasks carried out by the TaskTracker running on the slave nodes. The user will only interact with the master node by submitting jobs to the JobTracker. The JobTracker then locates and submits the jobs to the TaskTracker. The slave nodes are monitored by the JobTracker through heartbeat signals to determine whether a node has failed. The JobTracker is a point of failure for the Hadoop MapReduce service and if it goes down, all jobs will be stopped. \\
 
 The TaskTracker runs on the slave nodes in a cluster and receives jobs from the JobTracker to execute the MapReduce tasks. Each TaskTracker has an allocation of task slots which indicate the number of tasks it can accept. The JobTracker will delegate jobs to the TaskTracker based on the number of available/empty slots while the TaskTracker will periodically send heartbeat signals to inform the JobTracker of any issues. TaskTracker failure is not considered fatal as tasks can be reallocated to another node when it becomes unresponsive.\\
+
+In the case the JobTracker does not receive any heartbeat from a TaskTracker for a period of time (default is set to 10 minutes), the JobTracker will know that the worker has failed. The JobTracker will reschedule all pending tasks to another TaskTracker. All the completed map tasks need to be rescheduled if they belong to incomplete jobs because the intermediate results may not be accessible to the reduce task. 
+
+
+%%%add in
+All this actions, if they apply, are added to the list of actions to be sent in the HeartbeatResponse. The fault tolerance mechanisms implemented in Hadoop are limited to reassign tasks when a given execution fails. In this situation, two scenarios are supported: 1. In case a task assigned to a given TaskTracker fails, a communication via the Heartbeat is used to notify the JobTracker, which will reassign the task to another node if possible. 2. If a TaskTracker fails, the JobTracker will notice the faulty situation because it will not receive the Heartbeats from that TaskTracker. Then, the JobTracker will assign the tasks the TaskTracker had to another TaskTracker. There is also a single point of failure in the JobTracker, since if it fails, the whole execution fails.
+
+ 4. fault tolerance - partition on containers, if one task dies can be repeated on a different node, 
+task is a map piece. one block on mapper is task, task can fail but can be repeated on another node
+
 
 \chapter{Hadoop Streaming}
 
@@ -256,13 +301,13 @@ The syntax below can be used to run MapReduce jobs written in a different langua
 $HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/hadoop-streaming.jar 
     -input myInputDirs 
     -output myOutputDir 
-    -mapper /bin/cat 
-    -reducer /usr/bin/wc
+    -mapper /bin/wc -l 
+    -reducer /usr/bin/awk '{n=n+$1}END{print n}' 
 \end{verbatim}
 
-The input command is used to provide the directory fo the input which the output command is used to provide the output directory. The mapper command is used to specify the executable mapper class while the reducer command is used to specify the executable reducer class.
+The input command is used to provide the directory fo the input which the output command is used to provide the output directory. The mapper command is used to specify the executable mapper class while the reducer command is used to specify the executable reducer class. 
 
-The mapper command is used to specify the executable mapper class while the reducer command is used to specify the executable reducer class.
+In the example above, myInputDirs is the input directory for the mapper and myOutputDir is the output directory for the reducer. The mapper executes the word count command in linux and the reducer aggregates the word count as a total.  
 
 \section{How it Works}
 
@@ -270,9 +315,25 @@ Let us now explore how Hadoop streaming works.\\
 
 \includegraphics[width=14cm]{streaming}\\
 
-The mapper and reducer are scripts/functions created by the user that reads in the input line by line from standard input and returns the output to standard output. If the mapper script/function is specified, the mapper will converts the inputs into lines and converts the lines to the standard input which feeds into the mapper. In the process, the mapper converts each line into a key and value pair returned as standard output. If the reducer script/function is specified, the reducer then draws the line-oriented key value pairs from the mapper as standard input and converts each line collected into a key/value pair. This is then emitted to standard output. 
+\subsection{Input Format}
 
-For both the mapper and the reducer, first entry of the line is the key followed by the value which is separate by a tab character. If there is no tab character in the line, then the entire line is considered as the key and the value is considered null. 
+The first part of the Hadoop streaming process involves the Input Format which defines the input specifications for the MapReduce Job. The Input Format is the class which selects the file from HDFS that should be input to the map function. It is responsible for the split on the input data so that the data can be correctly assigned to the mappers. The data is divided into blocks (typically 64/128mb) in HDFS which is the assigned to the mappers for further processing. We know that the Inputs and Outputs for the map and reduce functions are key-value pairs separated by a tab character. Hence the Input Format is also responsible for converting the data into the key-value pairs for the mapper. This is called the RecordReader. Another benefit of using Hadoop streaming is that the user can specify their own formatter for the input and output using another language. 
+
+\subsection{Mapper & Reducer}
+
+Mappers and Reducers are the Hadoop servers that run the Map and Reduce functions respectively. 
+
+Both function are specified by the user which can also written in another language made available through Hadoop streaming. The Map function takes the data from the standard input as key-value pairs, processes them, and produces another set of intermediate key-value pairs as standard output. The Reduce function also takes standard inputs as key-value pairs, and produces key-value pairs as standard output.
+
+In the Map stage, each block is assigned to a Mapper which runs in parallel. The number of mappers is decided by the Hadoop framework. it based on the size of the data and the memory block available on each mapper server. After the mappers complete processing, the framework shuffles and sorts the results before passing the data onto the reducers. It is important to note that a reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer to process. The reducer then aggregates the values for each specific key and returns the output as key-value pairs.
+
+Reduce
+After all the mappers complete processing, the framework shuffles and sorts the results before passing them on to the reducers. A reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer, which then aggregates the values for that key.
+
+\subsection{Output Format}
+
+
+%%%%write on output format
 
 \section{Advantages}
 
@@ -286,7 +347,9 @@ For both the mapper and the reducer, first entry of the line is the key followed
 
 \chapter{HMR Hadoop MapReduce Package for R}
 
-HMR is a package developed in R which acts as an interface which give R users the ability to execute Hadoop Map/Reduce jobs. It is highly efficient as it utilise chunk-wise processing as well as automated conversion to and from R objects. This allows users to feed existing R code to Hadoop with ease. There are other packages in R which uses the traditional key-value operations such as the \pkg{rmr2} package.
+HMR is a package developed in R which acts as an interface which give users the ability to execute Hadoop MapReduce jobs directly through R. The MapReduce job can be completely submitted using R without the user having to access Hadoop or code in Java. The package enables Hadoop streaming as it allows the user to specify the Input Format, the Map and Reduce function, and the Output Format through R functions and R data structures such as matrices and data frames.
+
+It is highly efficient by parses data in binary and utilises chunk-wise processing as well as automated conversion to and from R objects. This enables a smooth and efficient transition between R and Hadoop. There are also other packages available in R which uses the traditional key-value operations such as the \pkg{rmr2} package.
 
 \section{Examples}
 
