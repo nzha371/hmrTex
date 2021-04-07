@@ -160,24 +160,31 @@ Unstructured data has its internal structure but it is not structured through pr
 
 Structured data, in contrast, is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with structured data include customer information, sales transactions, airline reservations systems, and billing systems. This type of structured data within relational databases can be accessed using Structured Query language (SQL).\\
  
- \section{Challenges around Unstructured Data}
+ \section{Challenges around Big Data}
  
-There is a challenge in managing unstructured data due to the fact that many organisation collect significantly larger concentrations of unstructured information. This can be quite difficult and expensive to explore. Often structured data is created from unstructured data through various processing methods. By converting to structured data, the data can be universally understood by the ordinary user, easily digestible by data programs as well as having the ability to transfer to other data tools.
+ \subsection{Converting Unstructured Data}
+ 
+The challenge today is that bulk of the data we have and store do not come in a nice structure that we can easily access and perform analysis on. In managing unstructured data, many organisation simply collect and store significant volumes of unstructured information without having the ability to process and interpret it. This is due to the difficulty and cost of exploring it. However, it is not to say there is no way of processing unstructured data. There is simply not a standard, or one conventional method of processing such data. There are ways that structured data can be created from unstructured data through various processing methods. By converting to structured data, the data can be universally understood by the ordinary user, easily digestible by data programs as well as having the ability to transfer to other data tools. Hence there is the motivation to turn this unstructured data into structured data so we can be more efficient in terms of processing and analysis. 
 
 When converting from unstructured data to structured data, the questions we often ask is what data do we wish to extract, is it a word count index or is it a particular feature, topic or sentiment? Then we want to explore what the structure look like. Is it key value pairs, JSON, XML, or Tabular? In the processing, we analyse the data and retrieve a structured metadata that augments the original data source. The alternative is to extract and clean the data if we already know what features we wish to extract. 
 
-1.     Identifying a Use Case
+\subsubsection{Example}
 
-Identifying the problem you are trying to solve is the first step of any successful data-driven initiative. This might be identifying the root cause of decreasing employee productivity or optimizing the sales process. Instead of mining information from terabytes of emails, call records, and documents, identify the information exchanges that are likely to contain key data about the sales process or employees’ performance.
+%% give example converting unstructured to structured
 
-2.     Mining Value from Unstructured Data
+\subsection{Other Challenges}
 
-Just having access to relevant unstructured data is not enough. Enterprises must have the ability to extract data trapped within emails, customer calls, scanned documents, spreadsheets, and other types of unstructured sources. To achieve this, businesses need a data extraction tool with optical character recognition (OCR) and report mining capabilities that can automatically identify and extract meaningful information for faster decision-making.
+Apart from the challenge to create structure from unstructured data, we are also concerned with the ability to process large concentration of data. Of course you may say that technology is improving at the same time, however, to have the biggest and strongest machine is not always ideal and cost-effective. Below are some alternative approaches that we can take to tackle the challenge around processing big data.
 
+\subsubsection{Parallel Computing}
 
-There are certainly tools that provide efficient report mining, text parsing, and OCR capabilities, the challenge, however, remains in integrating unstructured data with existing information systems.
+Parallel computing is to maximise the use of processors to perform multiple tasks assigned to them simultaneously. Memory in parallel systems can be either shared or distributed. The main use of parallel computing is to execute and process data efficiently since it saves time, allowing the execution of applications in a shorter wall-clock time. However, this is limited to the computing power of the single machine.
 
-To get their head around unstructured data and use it to validate assumptions and support decision-making, businesses need a tool that can improve and automate their ability to extract unstructured data, as well as integrate it with databases, enterprise applications, and visualization tools. Finding an ideal data extraction solution may require some time and effort, but it will allow businesses to consolidate structured and unstructured data and give it a clear purpose beyond marketing and IT, for a more customer-focused approach across the organization.
+\subsubsection{Distributed Computing}
+
+Distributed computing involves multiple computers, physical servers, virtual machines, containers or any other node that communicate and coordinate actions in order to appear as a single coherent system. This system is not able to use a shared memory due to each node being physically separated, so the computers can only exchange messages and data over a network. However, distributed computing makes all nodes in the cluster work together as if they were one. This  significantly improves the performance through parallelism in which each node simultaneously handle a subset of the overall task as well as reducing cost of running a single high performance machine.
+
+The ideal solution is to have a distributed system with the capabilities of parallel processing. 
 
 \chapter{MapReduce Framework}
 
@@ -251,6 +258,8 @@ The main advantages of HDFS is data locality and fault tolerance. Data locality 
 
 \section{Fault Tolerance in HDFS}
 
+Fault tolerance refers to the ability for the system to handle unfavourable conditions, such as the failure of machine in the HDFS cluster. Fault is handled through the process of replica creation, which is to replicate the data on different machines in the HDFS cluster. So whenever a machine fail, the data can be accessed from other machines in which the same copies of data were created.
+
 Suppose the user stores a file XYZ. HDFS will break this file into blocks, say A, B, and C. Let’s assume there are four DataNodes, say D1, D2, D3, and D4. HDFS creates replicas of each block and stores them on different nodes to achieve fault tolerance. For each original block, there will be two replicas stored on different nodes.
 
 \includegraphics[width=8cm]{faulttol}
@@ -273,29 +282,46 @@ Similar to HDFS, the MapReduce process also utilises the master/slave architectu
 
 The JobTracker monitors the MapReduce tasks carried out by the TaskTracker running on the slave nodes. The user will only interact with the master node by submitting jobs to the JobTracker. The JobTracker then locates and submits the jobs to the TaskTracker. The slave nodes are monitored by the JobTracker through heartbeat signals to determine whether a node has failed. The JobTracker is a point of failure for the Hadoop MapReduce service and if it goes down, all jobs will be stopped. \\
 
-The TaskTracker runs on the slave nodes in a cluster and receives jobs from the JobTracker to execute the MapReduce tasks. Each TaskTracker has an allocation of task slots which indicate the number of tasks it can accept. The JobTracker will delegate jobs to the TaskTracker based on the number of available/empty slots while the TaskTracker will periodically send heartbeat signals to inform the JobTracker of any issues. TaskTracker failure is not considered fatal as tasks can be reallocated to another node when it becomes unresponsive.\\
+The TaskTracker runs on the slave nodes in a cluster and receives jobs from the JobTracker to execute the MapReduce tasks. Each TaskTracker has an allocation of task slots which indicate the number of tasks it can accept. The JobTracker will delegate jobs to the TaskTracker based on the number of available/empty slots while the TaskTracker will periodically send heartbeat signals to inform the JobTracker of any issues. If one task dies either during the map or reduce phase the JobTracker is able to restart and repeat the task by assigning it to another node. Hence TaskTracker failure is not considered fatal as tasks can be reallocated when it becomes unresponsive.\\
 
 In the case the JobTracker does not receive any heartbeat from a TaskTracker for a period of time (default is set to 10 minutes), the JobTracker will know that the worker has failed. The JobTracker will reschedule all pending tasks to another TaskTracker. All the completed map tasks need to be rescheduled if they belong to incomplete jobs because the intermediate results may not be accessible to the reduce task. 
 
+\chapter{Streaming in Hadoop}
 
-%%%add in
-All this actions, if they apply, are added to the list of actions to be sent in the HeartbeatResponse. The fault tolerance mechanisms implemented in Hadoop are limited to reassign tasks when a given execution fails. In this situation, two scenarios are supported: 1. In case a task assigned to a given TaskTracker fails, a communication via the Heartbeat is used to notify the JobTracker, which will reassign the task to another node if possible. 2. If a TaskTracker fails, the JobTracker will notice the faulty situation because it will not receive the Heartbeats from that TaskTracker. Then, the JobTracker will assign the tasks the TaskTracker had to another TaskTracker. There is also a single point of failure in the JobTracker, since if it fails, the whole execution fails.
+\section{What is Streaming}
 
- 4. fault tolerance - partition on containers, if one task dies can be repeated on a different node, 
-task is a map piece. one block on mapper is task, task can fail but can be repeated on another node
+\includegraphics[width=14cm]{streaming}\\
 
+When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time. It can be thought of a channel connecting a processor (where the data is processed according to given set of instructions) to the input and output device.
 
-\chapter{Hadoop Streaming}
+An input stream is when the stream acts as a source stream for the program where the data is transferred to be processed from an input device to the program. The program requests the data transfer through a read operation known as input stream/standard input.
 
-Hadoop streaming is a utility that comes with the Hadoop distribution which allow users to create and run MapReduce jobs to be executed in the Hadoop cluster using other languages. By default the Hadoop MapReduce framework is written in Java but it utilizes Unix streams to pipe between Hadoop and our MapReduce program so we can use any language which can read standard input and write to standard output for our MapReduce program. MapReduce programs can be written in mutiple languages such as R, Python, Perl, PHP, C++, etc. The utility is packed in a JAR file. 
+An output stream is when the stream acts as a destination stream for the output device where data is transferred from the program to the output device. The program transfers its output data through a write operation known as output stream/standard output.
 
-\section{Purpose}
+Standard error is another output stream used by the program to output error messages or diagnostics. This stream is independent of standard output and is useful for identifying errors produced by the program. While it is independent, it is acceptable to direct the standard output and the standard error to the same output destination such as a text terminal.
+
+\subsubsection{Example}
+
+We can look at a basic example to understand how streaming works.
+
+\includegraphics[width=14cm]{streamex}\\
+
+The keyboard which is our input device writes data to the stdin (standard input) stream which is then processed by the computer program. Output is written to the stdout (standard output) stream and any errors is written to the stderr (standard error) stream shown on the display which is our output device. When we call print in the program, we are really just writing to the stdout variable. 
+
+\section{Hadoop Streaming}
+
+Hadoop streaming makes use of the same streaming process where we discussed earlier. It is a utility that comes with the Hadoop distribution which allow users to create and run MapReduce jobs to be executed in the Hadoop cluster using other languages. By default the Hadoop MapReduce framework is written in Java but it utilizes Unix streams to pipe between Hadoop and our MapReduce program so we can use any language which can read standard input and write to standard output for our MapReduce program. MapReduce programs can be written in multiple languages such as R, Python, Perl, PHP, C++, etc. The utility is packed in a JAR file. 
 
 Using the utility, we can create executable scripts to run MapReduce Jobs. Furthermore, we can create executable scripts to run the mapper and reducer functions which are passed to Hadoop streaming. The utility creates map and reduce jobs and submits them to the cluster which can then be monitored, thus enabling a person to write MapReduce job in the language of their choice without having any knowledge of Java.
+
+\section{Concept of Formatting}
+
+Formatting is a requirement in streaming, to enable programs to interpret the data we parse to it. Instead of reading data from a physical input device such as keyboard, Hadoop streaming is designed to handle and parse large volumes of data which can be completely unstructured as we discussed earlier in Chapter 1: Concepts of Big Data. Parsing the unstructured data to the program is achieved through the input streams and is generally not an issue, however for the data to be processed by our MapReduce programs, we need to give it a structure. This is what we refer to as the formatting. The formatter takes each row of our input data and turns it into into something that the program can compute on. The raw bytes from our input stream are initially parsed as chunks consisting of single row values. The formatter defines and separates the values for every record of data in the chunk.The next step is for the formatter to identify the class/data type for each of the values. Once we have the structure, the data in each chunk can be interpreted by our programs, which in our case is the mapper and the reducer. 
 
 \section{Syntax}
 
 The syntax below can be used to run MapReduce jobs written in a different language to process data using the Hadoop MapReduce framework.\\
+
 
 \begin{verbatim}
 $HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/hadoop-streaming.jar 
@@ -309,11 +335,11 @@ The input command is used to provide the directory fo the input which the output
 
 In the example above, myInputDirs is the input directory for the mapper and myOutputDir is the output directory for the reducer. The mapper executes the word count command in linux and the reducer aggregates the word count as a total.  
 
-\section{How it Works}
+\section{Implementation of Hadoop Streaming}
 
 Let us now explore how Hadoop streaming works.\\
 
-\includegraphics[width=14cm]{streaming}\\
+\includegraphics[width=14cm]{hadoopstreaming}\\
 
 \subsection{Input Format}
 
@@ -321,19 +347,19 @@ The first part of the Hadoop streaming process involves the Input Format which d
 
 \subsection{Mapper \& Reducer}
 
-Mappers and Reducers are the Hadoop servers that run the Map and Reduce functions respectively. 
+We will be mainly focusing on this stage in our paper. Mappers and Reducers are the Hadoop servers that run the Map and Reduce programs respectively. 
 
-Both function are specified by the user which can also written in another language made available through Hadoop streaming. The Map function takes the data from the standard input as key-value pairs, processes them, and produces another set of intermediate key-value pairs as standard output. The Reduce function also takes standard inputs as key-value pairs, and produces key-value pairs as standard output.
+Both the map and reduce function are specified by the user which can also written in another language made available through Hadoop streaming. The Map function takes the data from the standard input as values, processes them, and produces another set of intermediate key-value pairs as standard output. The Reduce function takes standard inputs as key-value pairs, and produces key-value pairs as standard output.
 
 In the Map stage, each block is assigned to a Mapper which runs in parallel. The number of mappers is decided by the Hadoop framework. it based on the size of the data and the memory block available on each mapper server. After the mappers complete processing, the framework shuffles and sorts the results before passing the data onto the reducers. It is important to note that a reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer to process. The reducer then aggregates the values for each specific key and returns the output as key-value pairs.
 
-Reduce
 After all the mappers complete processing, the framework shuffles and sorts the results before passing them on to the reducers. A reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer, which then aggregates the values for that key.
 
 \subsection{Output Format}
 
 
 %%%%write on output format
+
 
 \section{Advantages}
 
@@ -346,6 +372,8 @@ After all the mappers complete processing, the framework shuffles and sorts the 
 \end{enumerate}
 
 \chapter{HMR Hadoop MapReduce Package for R}
+
+We will be using R to stream and execute MapReduce jobs in the Hadoop cluster. \\
 
 HMR is a package developed in R which acts as an interface which give users the ability to execute Hadoop MapReduce jobs directly through R. The MapReduce job can be completely submitted using R without the user having to access Hadoop or code in Java. The package enables Hadoop streaming as it allows the user to specify the Input Format, the Map and Reduce function, and the Output Format through R functions and R data structures such as matrices and data frames.
 
@@ -376,9 +404,18 @@ hmr(hinput("taxi/2015/01",
     map=function(d) nrow(d), reducers=0, wait=FALSE)
 \end{verbatim}
 
-\section{Concept of HMR Package in R}
 
-The HMR package is essentially a Hadoop streaming API which runs in R. This allows the user to run MapReduce jobs and write formatter functions in R as opposed to writing scripts in the native language Java. The idea is stream the data from a file path/connection in Hadoop and parse into R as individual blocks represented in raw binary format. The data is converted into R objects such as matrix/data frames which enables the user to write the formatter functions. The functions is written in the R language for the mapper and reducer to process each of the blocks simultaneously. The final script is converted to Java and passed to Hadoop to execute the MapProduce job. The output is converted back to raw bytes and stored as HDFS which can be access through Hadoop.
+\section{Formatting and Streaming in R}
+
+The HMR package is essentially a Hadoop streaming API which runs in R. This allows the user to run MapReduce jobs and write formatter functions in R as opposed to writing scripts in the native language Java. \\
+
+The idea is stream the data from a file path/connection in Hadoop and parse into R as individual blocks represented in raw binary format. We apply the formatter to the rows of each chunk. The formatter defines the structure of the data for each columns of values along with its class/data type. This structure is a function which is applied to every chunk of data produced from the split. The result contains chunks of data converted into R objects in the form of a matrix or data frame. Each chunk contains rows of values separated by a specified delimiter.\\
+
+Each chunk will be associated with each map process. The mapper takes in the data frame of values as standard input and executes the user defined mapper function on it. The  mapper function identifies the keys from the values associated with it. Hence, the output generated by the mapper process is a structured object containing the key and its values associated with it separated by a tab character. If the reducer process has not been specified by the user, the output will contain the key-value pairs across each row. It is important to note that each key will be unique to each chunk. In other words, we will not find multiple keys in the same chunk. \\
+
+The chunks of data frames containing of key-value pairs (known as the intermediate values) are not visible if the reduce process has been specified by the user. We again apply the formatter to the intermediate values from the mapper and define the structure. Each chunk of intermediate values are associated with each reduce process. The reducer takes in the data frame of key-value pairs as standard input and executes the user defined reducer function on it. The output of the reducer is also structured key-value pairs. The values associated with each key is aggregated since each key is unique to each chunk, however the number of chunks in our output is dependent on how many reducers the user chose to specify. \\
+
+Lastly, the chunks are converted back into the raw binary format and parsed back into Hadoop. This is stored in HDFS which can be accessed through Hadoop. 
 
 \section{Current Approach}
 
@@ -470,14 +507,39 @@ opts_chunk$set(comment = NA,
                highlight = TRUE,
                continue = "  ")  # Usually a "+"
 
-r <- charToRaw("VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,pickup_longitude,pickup_latitude,RateCodeID,store_and_fwd_flag,dropoff_longitude,dropoff_latitude,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount\n2,2015-01-15 19:05:39,2015-01-15 19:23:42,1,1.59,-73.993896484375,40.750110626220703,1,N,-73.974784851074219,40.750617980957031,1,12,1,0.5,3.25,0,0.3,17.05\n1,2015-01-10 20:33:38,2015-01-10 20:53:28,1,3.30,-74.00164794921875,40.7242431640625,1,N,-73.994415283203125,40.759109497070313,1,14.5,0.5,0.5,2,0,0.3,17.8\n1,2015-01-10 20:33:38,2015-01-10 20:43:41,1,1.80,-73.963340759277344,40.802787780761719,1,N,-73.951820373535156,40.824413299560547,2,9.5,0.5,0.5,0,0,0.3,10.8\n1,2015-01-10 20:33:39,2015-01-10 20:35:31,1,.50,-74.009086608886719,40.713817596435547,1,N,-74.004325866699219,40.719985961914063,2,3.5,0.5,0.5,0,0,0.3,4.8\n1,2015-01-10 20:33:39,2015-01-10 20:52:58,1,3.00,-73.971176147460938,40.762428283691406,1,N,-74.004180908203125,40.742652893066406,2,15,0.5,0.5,0,0,0.3,16.3\n1,2015-01-10 20:33:39,2015-01-10 20:53:52,1,9.00,-73.874374389648438,40.7740478515625,1,N,-73.986976623535156,40.758193969726563,1,27,0.5,0.5,6.7,5.33,0.3,40.33\n1,2015-01-10 20:33:39,2015-01-10 20:58:31,1,2.20,-73.9832763671875,40.726009368896484,1,N,-73.992469787")
-@ 
+r <- charToRaw("VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,pickup_longitude,pickup_latitude,RateCodeID,store_and_fwd_flag,dropoff_longitude,dropoff_latitude,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount
+2,2015-01-15 19:05:39,2015-01-15 19:23:42,1,1.59,-73.993896484375,40.750110626220703,1,N,-73.974784851074219,40.750617980957031,1,12,1,0.5,3.25,0,0.3,17.05
+1,2015-01-10 20:33:38,2015-01-10 20:53:28,1,3.30,-74.00164794921875,40.7242431640625,1,N,-73.994415283203125,40.759109497070313,1,14.5,0.5,0.5,2,0,0.3,17.8
+1,2015-01-10 20:33:38,2015-01-10 20:43:41,1,1.80,-73.963340759277344,40.802787780761719,1,N,-73.951820373535156,40.824413299560547,2,9.5,0.5,0.5,0,0,0.3,10.8
+1,2015-01-10 20:33:39,2015-01-10 20:35:31,1,.50,-74.009086608886719,40.713817596435547,1,N,-74.004325866699219,40.719985961914063,2,3.5,0.5,0.5,0,0,0.3,4.8
+1,2015-01-10 20:33:39,2015-01-10 20:52:58,1,3.00,-73.971176147460938,40.762428283691406,1,N,-74.004180908203125,40.742652893066406,2,15,0.5,0.5,0,0,0.3,16.3
+1,2015-01-10 20:33:39,2015-01-10 20:53:52,1,9.00,-73.874374389648438,40.7740478515625,1,N,-73.986976623535156,40.758193969726563,1,27,0.5,0.5,6.7,5.33,0.3,40.33
+1,2015-01-10 20:33:39,2015-01-10 20:58:31,1,2.20,-73.9832763671875,40.726009368896484,1,N,-73.992469787597656,40.7496337890625,2,14,0.5,0.5,0,0,0.3,15.3
+1,2015-01-10 20:33:39,2015-01-10 20:42:20,3,.80,-74.002662658691406,40.734142303466797,1,N,-73.995010375976563,40.726325988769531,1,7,0.5,0.5,1.66,0,0.3,9.96
+1,2015-01-10 20:33:39,2015-01-10 21:11:35,3,18.20,-73.783042907714844,40.644355773925781,2,N,-73.987594604492187,40.759357452392578,2,52,0,0.5,0,5.33,0.3,58.13
+1,2015-01-10 20:33:40,2015-01-10 20:40:44,2,.90,-73.985588073730469,40.767948150634766,1,N,-73.985916137695313,40.759365081787109,1,6.5,0.5,0.5,1.55,0,0.3,9.35
+1,2015-01-10 20:33:40,2015-01-10 20:41:39,1,.90,-73.988616943359375,40.723102569580078,1,N,-74.00439453125,40.728584289550781,1,7,0.5,0.5,1.66,0,0.3,9.96
+1,2015-01-10 20:33:41,2015-01-10 20:43:26,1,1.10,-73.993782043457031,40.751419067382812,1,N,-73.9674072265625,40.757217407226563,1,7.5,0.5,0.5,1,0,0.3,9.8
+1,2015-01-10 20:33:41,2015-01-10 20:35:23,1,.30,-74.00836181640625,40.704376220703125,1,N,-74.009773254394531,40.707725524902344,2,3,0.5,0.5,0,0,0.3,4.3
+1,2015-01-10 20:33:41,2015-01-10 21:03:04,1,3.10,-73.973945617675781,40.760448455810547,1,N,-73.997344970703125,40.735210418701172,1,19,0.5,0.5,3,0,0.3,23.3
+1,2015-01-10 20:33:41,2015-01-10 20:39:23,1,1.10,-74.006721496582031,40.731777191162109,1,N,-73.995216369628906,40.739894866943359,2,6,0.5,0.5,0,0,0.3,7.3
+2,2015-01-15 19:05:39,2015-01-15 19:32:00,1,2.38,-73.976425170898437,40.739810943603516,1,N,-73.983978271484375,40.757888793945313,1,16.5,1,0.5,4.38,0,0.3,22.68
+2,2015-01-15 19:05:40,2015-01-15 19:21:00,5,2.83,-73.968704223632812,40.754245758056641,1,N,-73.955123901367188,40.786857604980469,2,12.5,1,0.5,0,0,0.3,14.3
+2,2015-01-15 19:05:40,2015-01-15 19:28:18,5,8.33,-73.863059997558594,40.769580841064453,1,N,-73.952713012695312,40.785781860351563,1,26,1,0.5,8.08,5.33,0.3,41.21
+2,2015-01-15 19:05:41,2015-01-15 19:20:36,1,2.37,-73.945541381835938,40.779422760009766,1,N,-73.980850219726563,40.786083221435547,1,11.5,1,0.5,0,0,0.3,13.3
+2,2015-01-15 19:05:41,2015-01-15 19:20:22,2,7.13,-73.874458312988281,40.774009704589844,1,N,-73.952377319335938,40.718589782714844,1,21.5,1,0.5,4.5,0,0.3,27.8
+2,2015-01-15 19:05:41,2015-01-15 19:31:00,1,3.60,-73.976600646972656,40.751895904541016,1,N,-73.998924255371094,40.714595794677734,2,17.5,1,0.5,0,0,0.3,19.3
+2,2015-01-15 19:05:41,2015-01-15 19:10:22,1,.89,-73.994956970214844,40.745079040527344,1,N,-73.99993896484375,40.734649658203125,1,5.5,1,0.5,1.62,0,0.3,8.92
+2,2015-01-15 19:05:41,2015-01-15 19:10:55,1,.96,-74.000938415527344,40.747062683105469,1,N,-74.003562927246094,40.735511779785156,1,5.5,1,0.5,1.3,0,0.3,8.6
+2,2015-01-15 19:05:41,2015-01-15 19:12:36,2,1.25,-74.002777099609375,40.717891693115234,1,N,-74.007919311523438,40.704219818115234,1,6.5,1,0.5,1.5,0,0.3,9.8")
+
+
 <<>>=
 cat(rawToChar(r))
 @ 
 
 <<>>=
-sep=","; nsep='\t'; nrowsClasses=25L; header=TRUE
+sep=","; nsep='\t'; nrowsClasses=5L; header=TRUE
 (subset <- mstrsplit(r, sep=sep, nsep=nsep,
  nrows=nrowsClasses, skip=header))
 @
@@ -609,5 +671,6 @@ Jeffrey Dean and Sanjay Ghemawat
 6. iotools: High-Performance I/O Tools for R, 
 Taylor Arnold, Michael J. Kane, and Simon Urbanek
 
+%https://www.researchgate.net/publication/261450947_Converting_unstructured_and_semi-structured_data_into_knowledge
 
 \end{document}

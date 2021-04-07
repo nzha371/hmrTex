@@ -1,7 +1,9 @@
-all: Project-sw.pdf
+all: 
+	make clean
+	make Project-sw.pdf
 
 Project-sw.pdf: Project-sw.tex
-	pdflatex $^
+	pdflatex $^ && pdflatex $^
 
 Project-sw.tex: Project-sw.Rnw
 	Rscript -e 'library(knitr); knit("$^")'
