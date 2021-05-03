@@ -292,21 +292,23 @@ In the case the JobTracker does not receive any heartbeat from a TaskTracker for
 
 \includegraphics[width=14cm]{streaming}\\
 
-When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time. It can be thought of a channel connecting a processor (where the data is processed according to given set of instructions) to the input and output device.
+When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time. The stream comes from various sources, in varying speed and volumes and flow into a single, continuous combined stream. We look at streaming from the program's perspective which is a logical connection between the program and the file/source. 
 
-An input stream is when the stream acts as a source stream for the program where the data is transferred to be processed from an input device to the program. The program requests the data transfer through a read operation known as input stream/standard input.
-
-An output stream is when the stream acts as a destination stream for the output device where data is transferred from the program to the output device. The program transfers its output data through a write operation known as output stream/standard output.
-
-Standard error is another output stream used by the program to output error messages or diagnostics. This stream is independent of standard output and is useful for identifying errors produced by the program. While it is independent, it is acceptable to direct the standard output and the standard error to the same output destination such as a text terminal.
+The program can get input from a data source by reading in data from a stream attached to a source. Once the data is processed by the program, it produces output by writing the data to an output stream attached to a destination. 
 
 \subsubsection{Example}
 
-We can look at a basic example to understand how streaming works.
+We can look at a basic example to understand how streaming works. We have a comma-separated values (csv) file stored in HDFS that we will stream into R.
 
-\includegraphics[width=14cm]{streamex}\\
+\includegraphics[width=14cm]{streamingex}\\
 
-The keyboard which is our input device writes data to the stdin (standard input) stream which is then processed by the computer program. Output is written to the stdout (standard output) stream and any errors is written to the stderr (standard error) stream shown on the display which is our output device. When we call print in the program, we are really just writing to the stdout variable. 
+The first command creates a pipe with connects the csv file in HDFS with R. The file is read into the R using the read.table function and saved into an R data frame object called 'd'. Note that we specified that our file contained a header, and each field is separated by a comma and the number of rows we read in is 5. Lastly, we output the data using the print function. 
+
+\section{Concept of Formatting - Specifiying Input Data}
+
+In the example above, we added specifications on how the data is read into R. As we know it is a csv file, logically we should the fields in with comma separators. What if our data file is not structured in a way we can easily read, or what if the file is too big for us to read efficiently. We have to create a specific function which tells us how we want to structure our input data after it is parsed into our program. For the data to be computable by the program, we need to create the specifications of the data, in other words the metadata which is the data that provides information about our data file. This includes information like how the fields should be separated, how many fields we have, the classes/ data types of our fields, etc.
+
+%get pic of metadata
 
 \section{Hadoop Streaming}
 
@@ -314,14 +316,9 @@ Hadoop streaming makes use of the same streaming process where we discussed earl
 
 Using the utility, we can create executable scripts to run MapReduce Jobs. Furthermore, we can create executable scripts to run the mapper and reducer functions which are passed to Hadoop streaming. The utility creates map and reduce jobs and submits them to the cluster which can then be monitored, thus enabling a person to write MapReduce job in the language of their choice without having any knowledge of Java.
 
-\section{Concept of Formatting}
-
-Formatting is a requirement in streaming, to enable programs to interpret the data we parse to it. Instead of reading data from a physical input device such as keyboard, Hadoop streaming is designed to handle and parse large volumes of data which can be completely unstructured as we discussed earlier in Chapter 1: Concepts of Big Data. Parsing the unstructured data to the program is achieved through the input streams and is generally not an issue, however for the data to be processed by our MapReduce programs, we need to give it a structure. This is what we refer to as the formatting. The formatter takes each row of our input data and turns it into into something that the program can compute on. The raw bytes from our input stream are initially parsed as chunks consisting of single row values. The formatter defines and separates the values for every record of data in the chunk.The next step is for the formatter to identify the class/data type for each of the values. Once we have the structure, the data in each chunk can be interpreted by our programs, which in our case is the mapper and the reducer. 
-
 \section{Syntax}
 
 The syntax below can be used to run MapReduce jobs written in a different language to process data using the Hadoop MapReduce framework.\\
-
 
 \begin{verbatim}
 $HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/hadoop-streaming.jar 
@@ -339,21 +336,21 @@ In the example above, myInputDirs is the input directory for the mapper and myOu
 
 Let us now explore how Hadoop streaming works.\\
 
-\includegraphics[width=14cm]{hadoopstreaming}\\
+\includegraphics[width=14cm]{hadoopstreaming1}\\
+
+In the above example image, we can see that the flow shown is a basic MapReduce job. Our main focus will be on the processes in the Mapper and Reducer stream.
 
 \subsection{Input Format}
 
-The first part of the Hadoop streaming process involves the Input Format which defines the input specifications for the MapReduce Job. The Input Format is the class which selects the file from HDFS that should be input to the map function. It is responsible for the split on the input data so that the data can be correctly assigned to the mappers. The data is divided into blocks (typically 64/128mb) in HDFS which is the assigned to the mappers for further processing. We know that the Inputs and Outputs for the map and reduce functions are key-value pairs separated by a tab character. Hence the Input Format is also responsible for converting the data into the key-value pairs for the mapper. This is called the RecordReader. Another benefit of using Hadoop streaming is that the user can specify their own formatter for the input and output using another language. 
+We have an Input Reader which defines the input specifications for the MapReduce job. it is responsible for reading the input data producing the structure for the Map process. We can read data from any source which may be structured or unstructured. This includes csv formats, delimiter formats, from a database table, images, audios etc. The only requirement to read all these types of data is that we have to create a particular input format for that data with these input readers. The input reader contains the complete logic about the data it is reading. We want to be able to structure the data in a way that the mapper can interpret and process. Hence we have to specify the logic which defines the structure of the input.
 
 \subsection{Mapper \& Reducer}
 
-We will be mainly focusing on this stage in our paper. Mappers and Reducers are the Hadoop servers that run the Map and Reduce programs respectively. 
+Mappers and Reducers are the Hadoop servers that run the Map and Reduce tasks respectively. The tasks involve reading in the data, processing the data through user defined scripts, and outputting it. Through Hadoop Streaming, the data is read into a different program where it can be processed using different language, and output back into the default Hadoop server.
 
-Both the map and reduce function are specified by the user which can also written in another language made available through Hadoop streaming. The Map function takes the data from the standard input as values, processes them, and produces another set of intermediate key-value pairs as standard output. The Reduce function takes standard inputs as key-value pairs, and produces key-value pairs as standard output.
+When the mapper is initiated, the input is broken down into multiple blocks known as input splits defined by the Input Format. Each mapper task associated with each block will convert its input into lines to the standard input (stdin) of the process. The Mapper essentially runs the formatter function on the input data from the standard input to convert the file into a format that can be executed by the program. The map program then executes the mapper function that performs the calculation/ reduce job. Once the script is executed by the map program, the mapper collects the line-oriented outputs from the standard output (stdout) of the process and converts each line into structured key/value pairs known as the intermediate values. The intermediate values are structured in a way where the prefix of a line up to the first tab character is the key value by default and the rest of the line will be the value associated with the key. If there is no tab character in the line, then the entire line is considered as the key with no value associated. After all the mappers tasks are complete, the framework shuffles and sorts the results. The output of the mapper is fed to the reducer task. 
 
-In the Map stage, each block is assigned to a Mapper which runs in parallel. The number of mappers is decided by the Hadoop framework. it based on the size of the data and the memory block available on each mapper server. After the mappers complete processing, the framework shuffles and sorts the results before passing the data onto the reducers. It is important to note that a reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer to process. The reducer then aggregates the values for each specific key and returns the output as key-value pairs.
-
-After all the mappers complete processing, the framework shuffles and sorts the results before passing them on to the reducers. A reducer cannot start while a mapper is still in progress. All the map output values that have the same key are assigned to a single reducer, which then aggregates the values for that key.
+The reducer runs the same process as the mapper where the intermediate values are now parsed into the reduce program. The reducer runs the formatter function on the input key/value pairs followed by the execution of the reducer function that performs the calculation/ reduce job. Once the job is executed by the reduce program, the reducer converts its input key/value pairs into lines and converts into tab separated key-value pairs. The output of the reducer is the final output of the MapReduce job. 
 
 \subsection{Output Format}
 
@@ -377,7 +374,7 @@ We will be using R to stream and execute MapReduce jobs in the Hadoop cluster. \
 
 HMR is a package developed in R which acts as an interface which give users the ability to execute Hadoop MapReduce jobs directly through R. The MapReduce job can be completely submitted using R without the user having to access Hadoop or code in Java. The package enables Hadoop streaming as it allows the user to specify the Input Format, the Map and Reduce function, and the Output Format through R functions and R data structures such as matrices and data frames.
 
-It is highly efficient by parses data in binary and utilises chunk-wise processing as well as automated conversion to and from R objects. This enables a smooth and efficient transition between R and Hadoop. There are also other packages available in R which uses the traditional key-value operations such as the \pkg{rmr2} package.
+High efficiency is achieved through parsing data in binary and utilises chunk-wise processing as well as automated conversion to and from R objects. This enables a smooth and efficient transition between R and Hadoop. There are also other packages available in R which uses the traditional key-value operations such as the \pkg{rmr2} package.
 
 \section{Examples}
 
@@ -395,27 +392,33 @@ The following R script streams the MapReduce process through the HMR function in
 hmr(hinput("taxi/2015/01"), map="wc -l", reducers=0, wait=FALSE)
 \end{verbatim}
 
-The following R script also performs the same line count calculation. However, the formatter has been specified which only include the first 5 fields of the data set. Instead of using shell command as the previous script, the mapper is using a R function "nrow" which also calculates the numbers of rows.
+The following R script also performs the same line count calculation. However, the formatter has been specified which only include the first 5 fields of the data set. Instead of using shell command as the previous script, the mapper is using a R function "nrow" which also calculates the numbers of rows. The difference is that the number of reducers has been set to 1. This will ensure that the we only receive one output.
  
 \begin{verbatim}
 hmr(hinput("taxi/2015/01",
            formatter=function(o) dstrsplit(o, list(vendor=1, NA, NA, 
            	pass=1, dist=1), sep=",", strict=FALSE)),
-    map=function(d) nrow(d), reducers=0, wait=FALSE)
+    map=function(d) nrow(d), reducers=1, wait=FALSE)
 \end{verbatim}
 
+The output is saved to a directory in HDFS and can be access with the unix command hadoop fs -ls /folder name and printed using hadoop fs -cat /folder name. \\
 
-\section{Formatting and Streaming in R}
+\includegraphics[width=14cm]{hmrresult}\\
 
-The HMR package is essentially a Hadoop streaming API which runs in R. This allows the user to run MapReduce jobs and write formatter functions in R as opposed to writing scripts in the native language Java. \\
+\section{Hadoop Streaming in R}
 
-The idea is stream the data from a file path/connection in Hadoop and parse into R as individual blocks represented in raw binary format. We apply the formatter to the rows of each chunk. The formatter defines the structure of the data for each columns of values along with its class/data type. This structure is a function which is applied to every chunk of data produced from the split. The result contains chunks of data converted into R objects in the form of a matrix or data frame. Each chunk contains rows of values separated by a specified delimiter.\\
+We have discussed the idea of how Hadoop Streaming works, let us now see how we can stream the MapReduce process in R using the HMR package. The HMR package is essentially a Hadoop streaming API which runs in R. This allows the user to run MapReduce jobs and write formatter functions in R as opposed to writing scripts in the native language Java. \\
 
-Each chunk will be associated with each map process. The mapper takes in the data frame of values as standard input and executes the user defined mapper function on it. The  mapper function identifies the keys from the values associated with it. Hence, the output generated by the mapper process is a structured object containing the key and its values associated with it separated by a tab character. If the reducer process has not been specified by the user, the output will contain the key-value pairs across each row. It is important to note that each key will be unique to each chunk. In other words, we will not find multiple keys in the same chunk. \\
+The first step is to specify the connection which is to define the HDFS path and input source. Once we have the connection established, the data can be parsed into R. The data is separated into blocks consisting of lines/rows referred to as chunks and the data is parsed as raw bytes which is much more efficient than parsing data as character values or any other data types. 
 
-The chunks of data frames containing of key-value pairs (known as the intermediate values) are not visible if the reduce process has been specified by the user. We again apply the formatter to the intermediate values from the mapper and define the structure. Each chunk of intermediate values are associated with each reduce process. The reducer takes in the data frame of key-value pairs as standard input and executes the user defined reducer function on it. The output of the reducer is also structured key-value pairs. The values associated with each key is aggregated since each key is unique to each chunk, however the number of chunks in our output is dependent on how many reducers the user chose to specify. \\
+For R to process the MapReduce program, we will need to format each chunk of data to a structure that R can interpret. This is the next step to specify the formatter functions for the mapper and the reducer. In R, this involves writing function that will convert the raw bytes into a rectangular structure with rows of records and columns of attributes (fields). Within each column, we can also specify the class/data type associated with each field. The default classes in R include integer, numeric, logical, character, complex, POSIXct, etc. The structure of the data as a result of executing the formatter should return an R object which is typically in the form of a matrix or data frame.
 
-Lastly, the chunks are converted back into the raw binary format and parsed back into Hadoop. This is stored in HDFS which can be accessed through Hadoop. 
+The next step is to specify the mapper and reducer functions for the map and reduce process. The nice thing here is that our functions are no longer in Java, we can simply write these function using R code to process and compute on the R data object which we have just converted. Each chunk of data will be associated with each map process. The mapper takes in the R object consisting of values and executes the user defined mapper function. The mapper function identifies the keys from the values associated with it and generates the output R data frame with the key and value/s separated by a tab delimiter. The data frame generated by the mapper is converted back to raw bytes before it is parsed onto the reducer as input.
+
+If the reduce function is not specified, the output will be parsed back to Hadoop HDFS. We will just receive the output of the mapper which is the shuffle and sorting of the key and its associated values without being reduced/aggregated. If we have specified the reduce function, the process follows the same process as the mapper. The reducer executes the formatter function and parse the data form the mapper output. Again, it is split into chunks, however this is dependent on how many reducers we have specified. The number of reducers will determine the number of chunks and the number of outputs? %check this%  
+Each chunk of data will be associated with each reduce process. The reducer takes in the R object consisting of key-value pairs and executes the user defined reduce function. The objective is to take all the values that have the same key assigned to a single reducer which then aggregates/combines the values for that key. The output generated by the reducer is converted back to raw bytes before it is parsed back to Hadoop and stored in HDFS in a set directory. 
+
+Mapreduce generates a function that is passed to Hadoop to execute?
 
 \section{Current Approach}
 
