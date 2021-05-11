@@ -292,27 +292,20 @@ In the case the JobTracker does not receive any heartbeat from a TaskTracker for
 
 \includegraphics[width=14cm]{streaming}\\
 
-When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time. The stream comes from various sources, in varying speed and volumes and flow into a single, continuous combined stream. We look at streaming from the program's perspective which is a logical connection between the program and the file/source. 
+When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time from one node to another. From one node to the next, each channel involves depicted by the arrow is a pipe, which includes standard input and standard output. The program can get input from a source by reading in data as standard input. This input is the standard output of the source. Likewise, the standard output of the program is read into the destination as standard input. 
 
-The program can get input from a data source by reading in data from a stream attached to a source. Once the data is processed by the program, it produces output by writing the data to an output stream attached to a destination. 
+We refer to the complete process as a stream. In terms of Hadoop Streaming, the data is streamed from HDFS to another program and back to HDFS.
 
 \subsubsection{Example}
 
 We can look at a basic example to understand how streaming works. We have a comma-separated values (csv) file stored in HDFS that we will stream into R.
 
-\includegraphics[width=14cm]{streamingex}\\
 
 The first command creates a pipe with connects the csv file in HDFS with R. The file is read into the R using the read.table function and saved into an R data frame object called 'd'. Note that we specified that our file contained a header, and each field is separated by a comma and the number of rows we read in is 5. Lastly, we output the data using the print function. 
 
-\section{Concept of Formatting - Specifiying Input Data}
-
-In the example above, we added specifications on how the data is read into R. As we know it is a csv file, logically we should the fields in with comma separators. What if our data file is not structured in a way we can easily read, or what if the file is too big for us to read efficiently. We have to create a specific function which tells us how we want to structure our input data after it is parsed into our program. For the data to be computable by the program, we need to create the specifications of the data, in other words the metadata which is the data that provides information about our data file. This includes information like how the fields should be separated, how many fields we have, the classes/ data types of our fields, etc.
-
-%get pic of metadata
-
 \section{Hadoop Streaming}
 
-Hadoop streaming makes use of the same streaming process where we discussed earlier. It is a utility that comes with the Hadoop distribution which allow users to create and run MapReduce jobs to be executed in the Hadoop cluster using other languages. By default the Hadoop MapReduce framework is written in Java but it utilizes Unix streams to pipe between Hadoop and our MapReduce program so we can use any language which can read standard input and write to standard output for our MapReduce program. MapReduce programs can be written in multiple languages such as R, Python, Perl, PHP, C++, etc. The utility is packed in a JAR file. 
+Hadoop streaming makes use of the streaming process which we discussed earlier. It is a utility that comes with the Hadoop distribution which allow users to create and run MapReduce jobs to be executed in the Hadoop cluster using other languages. By default the Hadoop MapReduce framework is written in Java but it utilizes Unix streams to pipe between Hadoop and our MapReduce program so we can use any language which can read standard input and write to standard output for our MapReduce program. MapReduce programs can be written in multiple languages such as R, Python, Perl, PHP, C++, etc. The utility is packed in a JAR file. 
 
 Using the utility, we can create executable scripts to run MapReduce Jobs. Furthermore, we can create executable scripts to run the mapper and reducer functions which are passed to Hadoop streaming. The utility creates map and reduce jobs and submits them to the cluster which can then be monitored, thus enabling a person to write MapReduce job in the language of their choice without having any knowledge of Java.
 
@@ -324,13 +317,13 @@ The syntax below can be used to run MapReduce jobs written in a different langua
 $HADOOP_HOME/bin/hadoop jar $HADOOP_HOME/hadoop-streaming.jar 
     -input myInputDirs 
     -output myOutputDir 
-    -mapper /bin/wc -l 
-    -reducer /usr/bin/awk '{n=n+$1}END{print n}' 
+    -mapper wc -l 
+    -reducer awk '{n=n+$1}END{print n}' 
 \end{verbatim}
 
-The input command is used to provide the directory fo the input which the output command is used to provide the output directory. The mapper command is used to specify the executable mapper class while the reducer command is used to specify the executable reducer class. 
+The input command is used to provide the directory fo the input where the output command is used to provide the output directory. The mapper command is used to specify the executable mapper class while the reducer command is used to specify the executable reducer class. 
 
-In the example above, myInputDirs is the input directory for the mapper and myOutputDir is the output directory for the reducer. The mapper executes the word count command in linux and the reducer aggregates the word count as a total.  
+In the example above, myInputDirs is the input directory for the mapper and myOutputDir is the output directory for the reducer. The mapper executes the word count linux command on the input data which is fed to the reducer which aggregates result of the word count as a total and then returns the output to the output directory. 
 
 \section{Implementation of Hadoop Streaming}
 
@@ -359,6 +352,8 @@ The reducer runs the same process as the mapper where the intermediate values ar
 
 
 \section{Advantages}
+
+Below are some of the advantages of using Hadoop Streaming.
 
 \begin{enumerate}
 \item Availability - the utility comes with the Hadoop distribution hence does not require further installation of softwares.
@@ -401,9 +396,52 @@ hmr(hinput("taxi/2015/01",
     map=function(d) nrow(d), reducers=1, wait=FALSE)
 \end{verbatim}
 
-The output is saved to a directory in HDFS and can be access with the unix command hadoop fs -ls /folder name and printed using hadoop fs -cat /folder name. \\
+The output is saved to a directory in HDFS and can be access with the unix command hadoop fs -ls /folder name and printed using hadoop fs -cat /folder name. As we did not specify a reduce function, we return the output of the mapper which is the row count. Each block of data is assigned to a single mapper program and this case we have 15 mapper producing 15 blocks of output. \\ 
 
-\includegraphics[width=14cm]{hmrresult}\\
+\begin{verbatim}
+hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-30397-0831adbdb7fb1e3e/*
+686375	
+861469	
+861493	
+861503	
+861529	
+861574	
+861610	
+861626	
+861649	
+861652	
+861678	
+861681	
+861691	
+861715	
+861742	
+\end{verbatim}
+
+\section{Concept of Formatting - Specifying Structure for Input Data}
+
+When data is streamed from an external source into R, we need to define the structure of the data file for R to interpret. \\
+
+Below is an example of parsing data from local disk to R. We use the R function read.table to illustrate how data is parsed. We added specifications on how the data is read into R. To ensure the data is read in correctly, we can specify the header, the separator symbol for each attribute, the data type for each attribute and the number of rows. 
+
+\begin{verbatim}
+> d <- read.table(file="data/taxi.csv", header=TRUE, sep=",", 
+				colClasses=c("integer", "numeric", logical", rep("character", 6), nrows=5)
+> d[,c(1,3,4,5)]
+  VendorID tpep_dropoff_datetime passenger_count trip_distance
+1        2   2015-01-15 19:23:42               1          1.59
+2        1   2015-01-10 20:53:28               1          3.30
+3        1   2015-01-10 20:43:41               1          1.80
+4        1   2015-01-10 20:35:31               1           .50
+5        1   2015-01-10 20:52:58               1          3.00
+\end{verbatim}
+
+The consequence of incorrectly parsing data into R will lead to issues when we try to compute on the data later on. 
+
+\section{Formatter in HMR}
+
+When we stream data from Hadoop, we are essentially creating a connection between HDFS and R. The above example works great when we can read in data from a structured file. What if our data file is not structured in a way we can easily read, or what if the file is too big for us to read efficiently. 
+
+The solution is to write a R function that defines the structure of the input data we want to parse. We call this the Formatter. This is a lot more powerful than data input functions which requires the file to be structured. With the formatter function, we can parse in any type of data. In the HMR package, the formatter function, we provide the specifications, or in other words, the metadata which is the data that provides information about our data file. This includes information like the separator we use for each field, how many fields we have, the classes/ data types of our fields, etc.
 
 \section{Hadoop Streaming in R}
 
@@ -420,25 +458,42 @@ Each chunk of data will be associated with each reduce process. The reducer take
 
 Mapreduce generates a function that is passed to Hadoop to execute?
 
-\section{Current Approach}
-
-In order for us to execute MapReduce jobs, we will require a server/cluster with Hadoop set up. The file path/connection defines the HDFS file path and input source. The input is read into R using chunk.reader from \pkg{iotools}. HMR can take two types of input objects: \code{hpath} and \code{hinput}. Hpath only contains the path of the input whereas hinput has an additional formatter argument which allows the user to specify the class of the input variables as a vector or a list. This will require the user to have some familiarity or knowledge of structure of the data. 
-
-The current logic allows the user to specify the function for both the mapper and reducer as a list or either one of the map or reduce function as a vector. If no list or vector is specified for the formatter, then HMR defaults to the default formatter which uses the mstrsplit function with tab as the key separator and $\mid$ as the the column separator. With the default formatter, the class of the variables are in the string/character format which is highly inefficient. If separate formatters are required, the formatter can be a list with the entries map and/or reduce specifying the corresponding formatter function. 
-
 \section{Leveraging\pkg{iotools} for Efficiency}
 
-HMR is highly efficient as it leverages the \pkg{iotools} package in \R. It is a set of tools for quickly importing and processing datasets using any data source. The functions packaged in \pkg{iotools} are comparatively faster than the native functions in R as well as other packages such as bigmemory, readr, foreach, etc. 
+The HMR package is highly efficient as it leverages the \pkg{iotools} package in \R. It is a set of tools for quickly importing and processing datasets using any data source. The functions packaged in \pkg{iotools} are comparatively faster than the native functions in R as well as other packages such as bigmemory, readr, foreach, etc. 
 
-The two functions chunk.reader and read.chunk are functions used in the HMR package. chunk.reader essentially converts a binary connection into chunks stored as an object in R while preserving the integrity of the lines. On the other hand, chunk.read converts this object into a raw vector for each subsequent chunk. The efficiency comes from the use of binary data and raw objects in R which allow fast chunk-wise processing. 
+The two functions chunk.reader and read.chunk are functions used in the HMR package to read data as multiple lines as opposed to reading line by line sequentially. Chunk reader reads by default 32Mb (as default) of lines from a binary connection and stores it as an R object while preserving the integrity of the lines. Chunk.read then converts this object into a raw vector for each subsequent block of 32Mb. By parsing blocks of lines rather than single lines, we are able to achieve higher efficiency for data streaming.
 
-Other core functions in the \pkg{iotools} package used in the HMR package are \code{mstrsplit} and \code{dstrsplit}. It takes either a raw or character vector and splits it into a matrix or data frame in R with the specified separator. These functions are able to minimize the copying of data and avoid the use of intermediate strings to improve performance.
+Other core functions in the \pkg{iotools} package used in the HMR package are \code{mstrsplit} and \code{dstrsplit}. \code{mstrsplit} takes a raw or character vector and converts it into a character matrix according to the separators, while \code{dstrsplit} takes the vector and convert it into a dataframe instead. These two functions are primarily used to convert the raw output from the chunk functions into a R object which we will feed into our MapReduce process in R. These functions are able to minimize the copying of data and avoid the use of intermediate strings to improve performance.
 
-%%%% talk about as.output, reverse of dstrsplit/mstrplit
+The other function we will be leveraging is \code{as.output} which is the reverse of \code{mstrsplit} and \code{dstrsplit}. \code{as.output} essentially converts our R object back into the raw bytes while preserving the metadata/structure of our data. This function is used to output our data after we have executed our map and reduce programs. 
 
-\chapter{Package Enhancement - Automating Formatters}
+\section{Current Approach - Formatting Logic}
 
-The motivation behind this project is to infer the input formatters for the mappers and the reducer by automatically detecting the class of the attributes from the input. 
+In order for us to execute MapReduce jobs, we will require a server/cluster with Hadoop set up. The file path/connection defines the HDFS file path and input source. HMR can take two types of input objects: \code{hpath} and \code{hinput}. Hpath only contains the path of the input whereas hinput has an additional formatter argument which allows the user to specify the class of the input variables as a vector or a list. This will require the user to have some familiarity or knowledge of structure of the data. Once the connection is specified, input is read into R using chunk.reader and chunk.read from \pkg{iotools}. 
+
+The current logic allows the user to specify the formatter for both the mapper and reducer as a list or the map or reduce formatter as a vector. If a single formatter function is specified, the same formatter will be used for both the map and reduce process. If no list or vector is specified for the formatter, then HMR defaults to the default formatter. The default formatter leverages the \code{mstrsplit} function that takes a raw vector which in our case is our data from HDFS and convert it into a matrix with a key and value structure. The key is the first column of the matrix separated from the values by a tab characters, however the values are returned as character types which is undesirable. The downside of this is that "character" data type requires more storage compared to other data types such as logical and integers. Having the incorrect data type also means we will need to convert our values to the correct type before we can compute on it. This can be resolved by converting the data type in our map and reduce functions.
+
+\section{Example of Formatter Function}
+
+\begin{verbatim}
+hinput("taxi/2015/01",
+           formatter=function(o) dstrsplit(o, list(vendor=1,NA,NA,pass=1,dist=1), 
+           sep=",", 
+           strict=FALSE)
+\end{verbatim}
+
+\section{Motivation for Enhancements}
+
+So far we have looked at running the MapReduce program with only the Mapper. To format the input data for the mapper is relatively simple as we have visibility of the data which we can easily infer the class/data type. However, this is not as simple for the reducer as we have no visibility of the mapper output unless we run multiple processes, i.e. run the whole MapReduce process with the mapper only then use the output to format our input data to the reducer. We want to be able to run MapReduce as one process as opposed to having to resort to trial and error. 
+
+Hence our motivation is to automatically infer the class/data types for a structured data set.
+
+\chapter{Package Enhancement - Automation of Formatters}
+
+% talk about motivation 
+
+As we have stated above, the goal of our project is to infer the input formatters for the mappers and the reducer by automatically detecting the class of the attributes from the input. 
 
 We know the importance of formatters with regards to writing the map and the reduce functions to execute the MapReduce job. Currently there is no way to infer the formatter for the reducer, hence it is particularly difficult to write the reduce function. Writing the formatter for the mapper is relatively easy as we can access the input data with ease, but it is not the same case for the reducer unless we know the output of the mapper.
 
@@ -450,9 +505,67 @@ The current approach allows the user to specify the formatter for the mapper and
 
 \section{Concept of Auto Detection}
 
-The idea is to take a sample of the complete data set and use that to automatically detect the formatters for the mapper. The easiest way is to take the first megabyte or specified number of lines to perform the detection. The drawback with this approach is that we have to assume the data types will be consistent across the complete data set. 
+We explored how we can write function to infer the data types for our input attributes and now we want to automate this as a feature for HMR.
+
+The idea is that we take a sample of the input data and use that infer the data type for the attributes and return the formatter function to the formatter in HMR. There are two approaches that we can take as we can create the formatters before executing our MapReduce job or we can create the formatters in the Map and Reduce tasks. We refer to the ahead of time as the "Static" approach and the in between approach as the "Dynamic" approach. The two approaches will have their advantages and drawbacks dependent on type of data that we are processing. 
+
+\subsection{Auto Formatting - Mapper}
+
+As we mentioned in the chapter above, to infer the data type for the mapper is relatively easy as we have access to the input data from HDFS. The goal is to automatically generate the formatter for the Map process. We will explore idea behind the two formatting approaches for the mapper.
+
+\subsubsection{Dynamic Approach}
+
+The dynamic approach formats the input data during the Mapper stage. The input data for the Mapper is structured in a way to only contain values. The dynamic approach reads a sample of the raw input data and returns a vector containing the column types for each value/attribute. This vector containing the column types is passed to the formatter function which is assigned to the map formatter allocated for each chunk. In our MapReduce job we will have a vector of column types for each Mapper which generates a separate formatter function containing the metadata of our input data for each data chunk.
+
+\subsubsection{Static Approach}
+
+The static approach formats the input data ahead of time, in other words, before the MapReduce job begins to execute. The static approach first creates a connection to the HDFS directory and reads a sample from the raw input data to also generate a vector containing the column types for each value/attribute. The difference is that we only execute and obtain one vector of column types. This approach generates a single formatter function which contains the metadata of our input data to be executed across all the mappers in the job.
+
+\subsection{Auto Formatting - Reducer}
+
+To infer the data type for the Reducer is quite difficult as we do not have immediate access to our input data which is also the output of the Mapper. Unlike the input data for the mapper, it is not stored on disk. The goal is to automatically generate the formatter for the Reduce process. We will explore idea behind the two formatting approaches for the reducer.
+
+\subsubsection{Dynamic Approach}
+
+The dynamic approach formats the input data during the Reduce stage. The dynamic approach for the Reducer is similar to the mapper as it reads the data during the executing of the Reduce phase. The difference for the Reducer is that the input data now contains a key-value structure which the formatter function will need to define. The approach reads a sample of the raw input data and returns a vector containing the column types for each value/attribute. This vector containing the column types is passed to the formatter function which is assigned to the reduce formatter allocated for each Reducer. In our MapReduce job we will have a vector of column types for each Reducer which generates a separate formatter function containing the metadata of our input data depending on the number of Reducers specified. 
+
+\subsubsection{Static Approach}
+
+The static approach for the Reducer formats both the input data of the Map phase and the Reduce phase prior to executing the MapReduce job. What we are essentially doing is running a MapReduce job on a sample of the complete data to obtain the formatter functions that we can then apply to the job. In this approach, we again create a connection to the HDFS directory to parse a sample of the raw input data with the column types for each value/attribute. At this point the vector of column types are only associated with the input for the Mapper, hence we run the Mapper process on the subset we obtained. From the output of Mapper, we can obtain the vector containing the datatypes for the values/attributes which we assign to the formatter function for the Reducer. This way the static approach creates a single formatter function for both the Map phase and the Reduce phase.
+
+
+
+ that can turn input data stored in raw bytes to an R object that can be read and processed by our Mapper program. 
+
+The idea is to read a reasonable size of data from HDFS and convert it into a R object usually in the form of a matrix with lines as the rows and attributes as the columns. From this matrix, we can identify the data type associated with each column. 
+
+
+
+to infer the data type for each column. The first solution is to detect the 
+
+For the mapper process, we take the input data from Hadoop 
+
+For the reducer process, we take the input data from the output of the mapper.
+
+The easiest way is to take the first megabyte or specified number of lines to perform the detection. The drawback with this approach is that we have to assume the data types will be consistent across the complete data set. 
 
 After we have the subset in the form of raw bytes, we convert it into a matrix separated by each variable of the data set. In the matrix form, we can detect the data type in each column as logical, integer, numeric, complex, character or factor. It should return a vector of the data type for each variable based on each column of the matrix. 
+
+
+
+auto detection - infer metadata from data file 
+what are different places we want to Use this
+input to mapper and input to reducer (reducer also need to take care of the key)
+reducer - recognised the key and values. 
+what am i trying to solve(
+  mapper need formatter
+  reducer I need the output of mapper will be to format the input data
+  challenges: doesnt exist on disk
+what and how for mapper then what and how for reducer
+
+Before we can infer the data type, we need to know the structure of our input data, how each field is separated. Ideally we want to work with data that does not have a header or remove it. 
+
+\section{Implementation in HMR}
 
 \section{New Approach - Two Approaches}
 
