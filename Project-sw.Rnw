@@ -13,6 +13,7 @@
 %\usepackage[backref=page]{backref}
 
 \usepackage{graphicx}
+\usepackage{url}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 
 \setlength{\oddsidemargin}{1.5cm}
@@ -45,7 +46,7 @@
 \vspace{1cm}
 
 %%% Type the thesis title below%%%%%%%%%%%%%%%%
-{\Huge         High-Performance Hadoop Map/Reduce R Interface Enhancement}
+{\Huge         Enhanced Scalable Distributed Computing - Hadoop MapReduce and R}
 
 \vspace{25mm} 
 
@@ -103,7 +104,7 @@ execution of enormous data intensive applications. This survey paper highlights 
 MapReduce models.
 
 
-
+motivations, 
 
 
 %: --------------------------------------------------------------
@@ -123,16 +124,33 @@ MapReduce models.
 	
 \chapter{Introduction}%    \chapter{}  = level 1, top level
 
-A thesis should always have an introduction.  The purpose is to describe the general subject area, state the research problem of interest, outline the main results of the thesis, and put the results in context with the wider subject area and its applications.
+In this day and age, we have the ability to collect and store large volumes of data, however, the question is whether we have the same ability to effectively parse and process data sets that are too big to contain on individual computers. Storage and processing power may not be an issue with the development in technology, but this method is not cost effective for most users and companies that wish to analyse their data. The alternative is divide the data and process them across multiple machines. Even though the processes are spread across multiple machines, they are run as one system. This is referred to the distributed computing model.\\
 
-The main body of the text must be divided into a logical scheme which  is followed consistently throughout the work.  
- It usually starts with an introduction chapter  and ends with  a conclusion chapter. See, for example, the table of contents on page 3. 
+The article looks into computation of large data sets using Hadoop MapReduce. MapReduce is a processing technique and a program model for distributed computing based on java. The algorithm contains two important steps, Map and Reduce. The Map process (referred to as the Mapper) deals with the splitting and mapping of data followed by the Reduce process (referred to as the Reducer) which shuffle and aggregates the data that come out of the Mapper. The MapReduce model can be executed through Hadoop which is an open source software framework for storing data and running processes like MapReduce. The data is stored in the Hadoop Distributed File System (HDFS) which is a distributed file system which is used to scale a single Hadoop cluster to hundreds to even throughs of nodes (machines). Hadoop is also capable of running MapReduce programs written in various different languages such as R, Ruby, Python, C++. This is referred to as Hadoop Streaming.\\
 
-There is strict  35-page limit  for an applied mathematics dissertation,  including  the references  but excluding  appendices. 
+The main focus of the article is related to Hadoop Streaming specifically through R. The HMR package is used to execute Hadoop MapReduce jobs in R. It is available on Github under \url{https://github.com/s-u/hmapred}.  The purpose of the project is to explore methods to enhance the capabilities of HMR for executing MapReduce programs in R. The article explain concepts and idea of how streaming works and the current implementations using HMR. Then we shift our focus to the idea of formatters. Formatters define the structure of the input data to both the Map and the Reduce process and is crucial for the streaming and execution of the MapReduce job. We can easily infer the structure and data type of the values for the Mapper from the input in HDFS, however we have no option to do so for the Reducer input. This is due to system limitation where the Mapper output is not directly accessible in the process.\\
+
+The next part of the articles focus on the concept and implementations of auto detecting the formatter for the Mapper and the Reducer. By doing so, we ensure that the job runs successfully without losing out too much on the efficiency of the process. We implement two approaches that can automatically detect the formatter functions for both the Mapper and the Reducer. They are referred to as the Dynamic approach which detects the formatters during the MapReduce job, while the Static approach detects the formatters ahead of time, which is before the execution of the MapReduce job. Examples and results are provided on various MapReduce algorithms using the two approaches.\\
+
+Lastly we conclude on the results and effectiveness of the enhancement in HMR as well as providing future directions for further development.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \chapter{Concept of Big Data}
 
-Big data concerns huge amounts, complex and diverse sets of information that is growing at ever-increasing rates. The size of the data suggest that we will need to deviate from the traditional processing methodologies and to adapt an inexpensive and efficient way through distributed/parallel computing.\\
+Big data concerns large amounts, complex and diverse sets of information that is growing at ever-increasing rates. The size of the data suggest that we will need to deviate from the traditional processing methodologies and to adapt an inexpensive and efficient way through distributed/parallel computing.\\
 
 Today, we can find upwards of 800 million webpages providing documentation on big data. Enthusiasts believe that Big Data is the next big thing after Cloud [1]. 
 
@@ -141,7 +159,7 @@ Today, we can find upwards of 800 million webpages providing documentation on bi
 The concept of big data is generally vague without a formal definition, however the general consensus is that there are specific attributes that define big data The four characteristics of big data are Volume, Velocity, Variety and Veracity [2]. 
 
 \begin{center}
-\includegraphics[width=10cm]{4vbd}\\
+\includegraphics[width=10cm]{bigdata}\\
 \end{center}
 
 The main characteristic that makes data “big” is its sheer volume. According to estimates by IBM, we can expect at least 40 Zettabytes (43 Trillion Gigabytes) of data to be created in 2020 [3]. The volume of data sets being processed and analysed has reached sizes larger than terabytes and even petabytes. This suggests that data sets these days are becoming too large to process within a single desktop machine/processor. \\
@@ -156,7 +174,7 @@ Veracity is the quality of the data. Information may be volatile or incomplete s
 
 Big data can be categorised as unstructured or structured.\\
  
-Unstructured data has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL.
+Unstructured data has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL.\\
 
 Structured data, in contrast, is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with structured data include customer information, sales transactions, airline reservations systems, and billing systems. This type of structured data within relational databases can be accessed using Structured Query language (SQL).\\
  
@@ -164,7 +182,7 @@ Structured data, in contrast, is usually stored and managed in relational databa
  
  \subsection{Converting Unstructured Data}
  
-The challenge today is that bulk of the data we have and store do not come in a nice structure that we can easily access and perform analysis on. In managing unstructured data, many organisation simply collect and store significant volumes of unstructured information without having the ability to process and interpret it. This is due to the difficulty and cost of exploring it. However, it is not to say there is no way of processing unstructured data. There is simply not a standard, or one conventional method of processing such data. There are ways that structured data can be created from unstructured data through various processing methods. By converting to structured data, the data can be universally understood by the ordinary user, easily digestible by data programs as well as having the ability to transfer to other data tools. Hence there is the motivation to turn this unstructured data into structured data so we can be more efficient in terms of processing and analysis. 
+The challenge today is that bulk of the data we have and store do not come in a nice structure that we can easily access and perform analysis on. In managing unstructured data, many organisation simply collect and store significant volumes of unstructured information without having the ability to process and interpret it. This is due to the difficulty and cost of exploring it. However, it is not to say there is no way of processing unstructured data. There is simply not a standard, or one conventional method of processing such data. There are ways that structured data can be created from unstructured data through various processing methods. By converting to structured data, the data can be universally understood by the ordinary user, easily digestible by data programs as well as having the ability to transfer to other data tools. Hence there is the motivation to turn this unstructured data into structured data so we can be more efficient in terms of processing and analysis. \\
 
 When converting from unstructured data to structured data, the questions we often ask is what data do we wish to extract, is it a word count index or is it a particular feature, topic or sentiment? Then we want to explore what the structure look like. Is it key value pairs, JSON, XML, or Tabular? In the processing, we analyse the data and retrieve a structured metadata that augments the original data source. The alternative is to extract and clean the data if we already know what features we wish to extract. 
 
@@ -541,56 +559,15 @@ The static approach for the Reducer formats both the input data of the Map phase
 
 \section{Implementation in HMR}
 
-\section{New Approach - Two Approaches}
-
 %talk about the idea of running in dynamic and in advance
 
 The enhancement provides automatic detection of the formatter for the Mapper and the Reducer in the absence of user specified formatters. The additional argument included in the HMR function is "autoformatter" which is set to TRUE for dynamic detection, FALSE for static approach and defaults to NULL if the user choose to specify their own formatters.
 
 There are two approaches for detecting the formatter. The original approach is to detect the formatter in advance which we refer to as the "static" approach. The alternative approach is to run the on each chunk during the MapReduce process. This is referred to the "dynamic" approach.
 
-\subsection{Dynamic Approach}
+\subsection{Taxi Data Set}
 
-With the dynamic approach, the goal is to read input data stored in raw bytes to a matrix object in R and infer the data type for each column. We create a function in R that is able to process this. The function takes the following inputs://
-
-\begin{enumerate}
-
-\item foo
-
-\end{enumerate}
-
-
-we only require one function that we
-
- it is a lot simpler to detect as we already have the data available in raw bytes so all we need to do is to find the data types for the formatter. We can simply detect both the formatter for the mapper and the reducer using the same function as it runs within the process. 
-
-The function named "coltypes" which takes the data in raw bytes, the specified column separator, the row name separator, specified number of lines, and the header. Using the mstrsplit function from\pkg{iotools} and the specified arguments, we can convert the raw data into matrix object in R. With each column of the matrix, we can apply the functions type.convert to create the appropriate data object across the rows and call the class function to determine the object class of each column/attribute. Using matrix operation functions we can operate on each of the columns and returns a vector containing the data type for each variable in the data set.
-
-advantages: each chunk may vary, 
-disadvantage: no header
-
-\begin{verbatim}
-  ## dynamic approach
-  coltypes <- function(r, sep=formsep, nsep='\t', 
-                       nrowsClasses=25L, chunksize=size, header=TRUE) {
-    if (sum(r==10) < nrowsClasses) {
-      nrowsClasses = sum(r==10)
-      r <- r[1:chunksize]
-      r <- r[1:tail(which(r==10),1)]
-    }
-    subset = mstrsplit(r, sep=sep, nsep=nsep, 
-    			nrows=nrowsClasses, skip=header)
-    colClasses = apply(subset, 2, function(x) 
-    				class(type.convert(x, as.is=TRUE)))
-    if (header) {
-      col_names = mstrsplit(r, sep=sep, nsep=nsep, nrows=1)
-      if ((length(col_names) - 1 == length(colClasses)) && !is.na(nsep))
-        col_names = col_names[-1]
-      names(colClasses) = col_names
-    }
-    colClasses
-  }
-\end{verbatim}
+Below is the data set used to provide examples and illustrate how the two approach work in R. The data set is already subsetted containing 25 records with the first 6 fields.
 
 <<echo=FALSE, include=FALSE>>=
     library(iotools)
@@ -604,124 +581,230 @@ opts_chunk$set(comment = NA,
                size = 'footnotesize',
                cache = FALSE,
                cache.path = 'MyKnitrFigs/mycache/',
-               background = rgb(0.9803922, 0.9803922, 0.8235294), # lightgoldenrodyellow
                highlight = TRUE,
                continue = "  ")  # Usually a "+"
 
-r <- charToRaw("VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,pickup_longitude,pickup_latitude,RateCodeID,store_and_fwd_flag,dropoff_longitude,dropoff_latitude,payment_type,fare_amount,extra,mta_tax,tip_amount,tolls_amount,improvement_surcharge,total_amount
-2,2015-01-15 19:05:39,2015-01-15 19:23:42,1,1.59,-73.993896484375,40.750110626220703,1,N,-73.974784851074219,40.750617980957031,1,12,1,0.5,3.25,0,0.3,17.05
-1,2015-01-10 20:33:38,2015-01-10 20:53:28,1,3.30,-74.00164794921875,40.7242431640625,1,N,-73.994415283203125,40.759109497070313,1,14.5,0.5,0.5,2,0,0.3,17.8
-1,2015-01-10 20:33:38,2015-01-10 20:43:41,1,1.80,-73.963340759277344,40.802787780761719,1,N,-73.951820373535156,40.824413299560547,2,9.5,0.5,0.5,0,0,0.3,10.8
-1,2015-01-10 20:33:39,2015-01-10 20:35:31,1,.50,-74.009086608886719,40.713817596435547,1,N,-74.004325866699219,40.719985961914063,2,3.5,0.5,0.5,0,0,0.3,4.8
-1,2015-01-10 20:33:39,2015-01-10 20:52:58,1,3.00,-73.971176147460938,40.762428283691406,1,N,-74.004180908203125,40.742652893066406,2,15,0.5,0.5,0,0,0.3,16.3
-1,2015-01-10 20:33:39,2015-01-10 20:53:52,1,9.00,-73.874374389648438,40.7740478515625,1,N,-73.986976623535156,40.758193969726563,1,27,0.5,0.5,6.7,5.33,0.3,40.33
-1,2015-01-10 20:33:39,2015-01-10 20:58:31,1,2.20,-73.9832763671875,40.726009368896484,1,N,-73.992469787597656,40.7496337890625,2,14,0.5,0.5,0,0,0.3,15.3
-1,2015-01-10 20:33:39,2015-01-10 20:42:20,3,.80,-74.002662658691406,40.734142303466797,1,N,-73.995010375976563,40.726325988769531,1,7,0.5,0.5,1.66,0,0.3,9.96
-1,2015-01-10 20:33:39,2015-01-10 21:11:35,3,18.20,-73.783042907714844,40.644355773925781,2,N,-73.987594604492187,40.759357452392578,2,52,0,0.5,0,5.33,0.3,58.13
-1,2015-01-10 20:33:40,2015-01-10 20:40:44,2,.90,-73.985588073730469,40.767948150634766,1,N,-73.985916137695313,40.759365081787109,1,6.5,0.5,0.5,1.55,0,0.3,9.35
-1,2015-01-10 20:33:40,2015-01-10 20:41:39,1,.90,-73.988616943359375,40.723102569580078,1,N,-74.00439453125,40.728584289550781,1,7,0.5,0.5,1.66,0,0.3,9.96
-1,2015-01-10 20:33:41,2015-01-10 20:43:26,1,1.10,-73.993782043457031,40.751419067382812,1,N,-73.9674072265625,40.757217407226563,1,7.5,0.5,0.5,1,0,0.3,9.8
-1,2015-01-10 20:33:41,2015-01-10 20:35:23,1,.30,-74.00836181640625,40.704376220703125,1,N,-74.009773254394531,40.707725524902344,2,3,0.5,0.5,0,0,0.3,4.3
-1,2015-01-10 20:33:41,2015-01-10 21:03:04,1,3.10,-73.973945617675781,40.760448455810547,1,N,-73.997344970703125,40.735210418701172,1,19,0.5,0.5,3,0,0.3,23.3
-1,2015-01-10 20:33:41,2015-01-10 20:39:23,1,1.10,-74.006721496582031,40.731777191162109,1,N,-73.995216369628906,40.739894866943359,2,6,0.5,0.5,0,0,0.3,7.3
-2,2015-01-15 19:05:39,2015-01-15 19:32:00,1,2.38,-73.976425170898437,40.739810943603516,1,N,-73.983978271484375,40.757888793945313,1,16.5,1,0.5,4.38,0,0.3,22.68
-2,2015-01-15 19:05:40,2015-01-15 19:21:00,5,2.83,-73.968704223632812,40.754245758056641,1,N,-73.955123901367188,40.786857604980469,2,12.5,1,0.5,0,0,0.3,14.3
-2,2015-01-15 19:05:40,2015-01-15 19:28:18,5,8.33,-73.863059997558594,40.769580841064453,1,N,-73.952713012695312,40.785781860351563,1,26,1,0.5,8.08,5.33,0.3,41.21
-2,2015-01-15 19:05:41,2015-01-15 19:20:36,1,2.37,-73.945541381835938,40.779422760009766,1,N,-73.980850219726563,40.786083221435547,1,11.5,1,0.5,0,0,0.3,13.3
-2,2015-01-15 19:05:41,2015-01-15 19:20:22,2,7.13,-73.874458312988281,40.774009704589844,1,N,-73.952377319335938,40.718589782714844,1,21.5,1,0.5,4.5,0,0.3,27.8
-2,2015-01-15 19:05:41,2015-01-15 19:31:00,1,3.60,-73.976600646972656,40.751895904541016,1,N,-73.998924255371094,40.714595794677734,2,17.5,1,0.5,0,0,0.3,19.3
-2,2015-01-15 19:05:41,2015-01-15 19:10:22,1,.89,-73.994956970214844,40.745079040527344,1,N,-73.99993896484375,40.734649658203125,1,5.5,1,0.5,1.62,0,0.3,8.92
-2,2015-01-15 19:05:41,2015-01-15 19:10:55,1,.96,-74.000938415527344,40.747062683105469,1,N,-74.003562927246094,40.735511779785156,1,5.5,1,0.5,1.3,0,0.3,8.6
-2,2015-01-15 19:05:41,2015-01-15 19:12:36,2,1.25,-74.002777099609375,40.717891693115234,1,N,-74.007919311523438,40.704219818115234,1,6.5,1,0.5,1.5,0,0.3,9.8")
 
+r <- charToRaw("VendorID,tpep_pickup_datetime,tpep_dropoff_datetime,passenger_count,trip_distance,
+2,2015-01-15 19:05:39,2015-01-15 19:23:42,1,1.59,
+1,2015-01-10 20:33:38,2015-01-10 20:53:28,1,3.30,
+1,2015-01-10 20:33:38,2015-01-10 20:43:41,1,1.80,
+1,2015-01-10 20:33:39,2015-01-10 20:35:31,1,.50,
+1,2015-01-10 20:33:39,2015-01-10 20:52:58,1,3.00,
+1,2015-01-10 20:33:39,2015-01-10 20:53:52,1,9.00,
+1,2015-01-10 20:33:39,2015-01-10 20:58:31,1,2.20,
+1,2015-01-10 20:33:39,2015-01-10 20:42:20,3,.80,
+1,2015-01-10 20:33:39,2015-01-10 21:11:35,3,18.20,
+1,2015-01-10 20:33:40,2015-01-10 20:40:44,2,.90,
+1,2015-01-10 20:33:40,2015-01-10 20:41:39,1,.90,
+1,2015-01-10 20:33:41,2015-01-10 20:43:26,1,1.10,
+1,2015-01-10 20:33:41,2015-01-10 20:35:23,1,.30,
+1,2015-01-10 20:33:41,2015-01-10 21:03:04,1,3.10,
+1,2015-01-10 20:33:41,2015-01-10 20:39:23,1,1.10,
+2,2015-01-15 19:05:39,2015-01-15 19:32:00,1,2.38,
+2,2015-01-15 19:05:40,2015-01-15 19:21:00,5,2.83,
+2,2015-01-15 19:05:40,2015-01-15 19:28:18,5,8.33,
+2,2015-01-15 19:05:41,2015-01-15 19:20:36,1,2.37,
+2,2015-01-15 19:05:41,2015-01-15 19:20:22,2,7.13,
+2,2015-01-15 19:05:41,2015-01-15 19:31:00,1,3.60,
+2,2015-01-15 19:05:41,2015-01-15 19:10:22,1,.89,
+2,2015-01-15 19:05:41,2015-01-15 19:10:55,1,.96,
+2,2015-01-15 19:05:41,2015-01-15 19:12:36,2,1.25")
+
+subset = mstrsplit(r, sep=",", nsep="\t", nrows=3, skip=TRUE)
+
+coltypes <- function(r, sep=",", nsep='\t',
+                       nrowsClasses=25L, chunksize=size, header=TRUE) {
+      subset = mstrsplit(r, sep=sep, nsep=nsep, nrows=nrowsClasses, skip=header)
+      apply(subset, 2, function(x) class(type.convert(x, as.is=TRUE)))
+  }
 
 <<>>=
 cat(rawToChar(r))
 @ 
 
-<<>>=
-sep=","; nsep='\t'; nrowsClasses=5L; header=TRUE
-(subset <- mstrsplit(r, sep=sep, nsep=nsep,
- nrows=nrowsClasses, skip=header))
-@
+
+\subsection{Dynamic Approach}
+
+With the dynamic approach, the goal is to read input data stored in raw bytes to a matrix object in R and infer the data type for each column. We create a function in R that is able to process this. We call this function \texttt{coltypes}. 
+
+\begin{verbatim}
+ coltypes <- function(r, sep=formsep, nsep='\t', 
+ 	nrowsClasses=25L, header=TRUE) 
+ \end{verbatim}
+
+The function takes the following inputs:
+
+\begin{itemize}
+\item \textbf{r} - input in the form of a raw vector 
+\item \textbf{sep} - separator character
+\item \textbf{nsep} - key separator character
+\item \textbf{nrows} - number of rows
+\item \textbf{header} - whether the input data contains a header as the first line
+\end{itemize}
+
+The first step of \texttt{coltypes} is to create a matrix from the vector of raw input. We use the function \texttt{mstrsplit} from \pkg{iotools} to read in the data using the specified inputs to define the structure of the matrix. It is important to note that each field is a character object as we did not specify the data type for each field.
+
+\begin{verbatim}
+subset = mstrsplit(r, sep=sep, nsep=nsep, 
+    			nrows=nrowsClasses, skip=header)
+\end{verbatim}
+
+The illustration below shows the matrix that is returned from the raw input using \texttt{mstrsplit}. We specify that we want the separator to be comma, tab as key separator, 5 rows and skip the header. We want to always skip the header so it does not appear in our matrix used to infer the data types.
 
 <<>>=
-apply(subset, 2, function(x) class(type.convert(x, as.is=TRUE)))
+sep=","; nsep='\t'; nrowsClasses=5L; header=TRUE
+mstrsplit(r, sep=sep, nsep=nsep, nrows=nrowsClasses, skip=header)
 @ 
+
+The next step is to infer the data types for each column of the matrix which represents the attributes of our data set. Based on the fields in each column, we convert the data type to the appropriate class. This is achieved using the \texttt{type.convert} function which converts the character object to a logical, integer, numeric, complex or character based on all the rows in the field. The \texttt{class} function will return the data type of each field and using \texttt{apply} we return the data type for all the rows in the columns.
+
+\begin{verbatim}
+colClasses = apply(subset, 2, function(x) 
+    				class(type.convert(x, as.is=TRUE)))	
+\end{verbatim}
+
+The illustration below shows the vector that is created from inferring the data types for each column of the matrix. The output of of the \texttt{coltypes} function is simply a vector that contains the data type of each field stored in a vector. This output is assigned to the column type in the formatter function assigned to the process (Map or Reduce) it is running. Each individual process will execute the \texttt{coltypes} function and generate its own formatter function for each chunk of data.
+
+<<>>=
+apply(subset, 2, function(x) class(type.convert(x, as.is=TRUE)))	
+@ 
+
+Each formatter function is defined by a \texttt{dstrsplit} function from \pkg{iotools}. The \texttt{dstrsplit} function is ultimately used to convert the full chunk of raw input to a R data frame given the structure of the input. The column\_types input for the formatter function is the \texttt{coltypes} function which infers and provides the column type.
+
+The specifications in the formatter function for the Mapper requires same separator used to infer the data as this is the separator for the input data. The header is also removed as we do not want to read the header as the first line.
+
+\begin{verbatim}
+map.formatter <- function(x) dstrsplit(x, col_types=coltypes(x), 
+          sep=sep, skip=TRUE)
+\end{verbatim}
+
+The specifications in the formatter function for the Reducer requires the key value pair structure. Hence, we require the key separator to be a tab character. There will be no header in the input to the Reducer hence we do not need to skip the header for inferring the data type as well as the formatter.
+
+\begin{verbatim}
+red.formatter <- function(x) dstrsplit(x, 
+          col_types=coltypes(x, header=FALSE), nsep='\t')
+\end{verbatim}
 
 \subsection{Static Approach}
 
-The static approach detects the formatter ahead of the time prior to executing the MapReduce job. As we are using a subset of the complete data set in advance, we will need to create a pipe to the HDFS location and read in the specified size of the sample data to perform the detection of the formatters. Using chunk.reader and chunk.read from \pkg{iotools} we can read in the connection and convert to a raw vector as input for the mapper. With the raw vector, we can leverage the coltypes function from the dynamic approach to detect the formatter for the mapper.
-
-The challenge for this approach is that we have to obtain the intermediate key-value pairs in order to automatically detect the formatter for the reducer. Hence there is an extra step which is to execute the mapper first using the subset to generate the mapper output that we will feed into the reducer as input. As the output of the mapper is an R object, we will need to convert it back to a raw vector using as.output from the \pkg{iotools} package. From here we can use the same coltypes function to detect the formatter for the reducer. The output from the detection will be a vector containing the data type for each variable in the data set.
-
-
-The risk with this approach is data may be incomplete, i.e. may be logical due to missing values. More suitable for known structure.
+With the static approach, the goal is to read input data, infer the data type and return a single formatter function for each Mapper and Reducer. We also create a function in R capable of performing this. We call this function \texttt{guess}. The \texttt{guess} function is executed ahead of time, in other words prior to the executing of the MapReduce job.
 
 \begin{verbatim}
-  ## new static approach
-  guess <- function(path, chunksize=size, header=TRUE, map) {
-    f <- pipe(paste("hadoop fs -cat", shQuote(path)), "rb")
-    cr <- chunk.reader(f)
-    r <- read.chunk(cr, chunksize)
-    colClasses = coltypes(r)
-    close(f)
-    if (!missing(map)) {
-      m = map(dstrsplit(r, colClasses, sep=formsep, skip=header))
-      c = coltypes(as.output(m), header=FALSE)
+guess <- function(path, chunksize, header=TRUE, map) {
+\end{verbatim}
+
+The function takes the following inputs:
+
+\begin{itemize}
+\item \textbf{path} - the path of the connection (to HDFS)
+\item \textbf{chunksize} - size of the raw input for subsetting
+\item \textbf{header} - whether the input data contains a header as the first line
+\item \textbf{map} - user defined map function 
+\end{itemize}
+
+The first step in \texttt{guess} is to create the connection and read the input into R. The connection between HDFS and R is created using the \texttt{pipe} function. 
+
+\begin{verbatim}
+f <- pipe(paste("hadoop fs -cat", shQuote(path)), "rb")
+\end{verbatim}
+
+Then we use \texttt{chunk.reader} and \texttt{read.chunk} to read in the data from HDFS as a raw vector. Instead of taking the first 25 rows of each chunk, the static approach takes by default 1 million bytes of input data from the top and use that to infer the column types. As the chunk operations do not preserve link breaks, we will have to remove the last row of incomplete line.
+
+\begin{verbatim}
+cr <- chunk.reader(f)
+r <- read.chunk(cr, chunksize)
+r <- r[1:tail(which(r==10),1)]
+\end{verbatim}
+
+Then we execute the \texttt{coltypes} function on the subset raw vector to output the vector containing the data types for each column.
+
+\begin{verbatim}
+colClasses = coltypes(r)
+\end{verbatim}
+
+The static approaches leverages the \texttt{coltypes} function to output the vector ahead of time. This way we only generate one output which is executed across each chunk of data associated with each process. 
+
+<<>>=
+coltypes(r)
+@ 
+
+The static approach proceeds to check if the map function is provided. The map function is only provided as input to \texttt{guess} when the Reducer has been specified in HMR. The map process is run on the subset data using the Map formatter. The output are the intermediate key-values which is store in a data frame. 
+
+\begin{verbatim}
+m = map(dstrsplit(r, col_type=colClasses, sep=sep, skip=header))
+\end{verbatim}
+
+In order to execute the \texttt{coltypes} function on the Mapper output, it needs to be converted back to raw bytes which is done using \texttt{as.output}. This output is used to infer the column types for the Reduce formatter. The headers of the intermediate values are also preserved by assigning the column names of the Mapper out to the inferred vector of column types.
+
+\begin{verbatim}
+c = coltypes(as.output(m), header=FALSE)
       if (length(c) == length(names(m)))
-        names(c) = names(m)
-      rm(list=c("cr", "r", "f"))
-      list(map=function(x) dstrsplit(x, colClasses, 
-      	sep=formsep, skip=header), 
-           reduce=function(x) dstrsplit(x, c, sep="|", 
-           	nsep="\t", skip=FALSE))
-    }
-    else function(x) dstrsplit(x, colClasses, sep=formsep, skip=header)
-  }
-  \end{verbatim}
+                 names(c) = names(m)
+\end{verbatim}
+
+Given that the Reducer is specified in the job, the \texttt{guess} function will output the formatter function for both the Mapper and the Reducer. The column types for the Mapper formatter will be taken from colClasses which was inferred on the Mapper input, whereas the the column types for the Reduce formatter will be taken from the vector c which was inferred on the Mapper output/Reducer input. In the Map formatter, we use the separator from the input data in HDFS whereas in the Reduce formatter, the key is separated from the values with a tab and the values are separated with a vertical bar. If the Reducer is not specified in the job, only the Map formatter will be returned.
+
+\begin{verbatim}
+ if (!missing(map)) {
+           list(map=function(x) dstrsplit(x, col_type=colClasses, 
+                            sep=",", skip=header), 
+           reduce=function(x) dstrsplit(x, col_type=c, sep="|", 
+                            nsep="\t", skip=FALSE))
+} 
+else function(x) dstrsplit(x, colClasses, sep=formsep, skip=header)
+\end{verbatim}
+
+The \texttt{guess} function returns the single formatter function for the Map and Reduce process which is applied to each of the data chunks accordingly.   \\
+
+The complete functions for the dynamic and static approach can be found in the HMR source code.
 
 \section{Formatter Logic}
 
+Let us now examine the logic for both the Mapper and the Reducer. \\
+
+\includegraphics[width=14cm]{formatterlogic}\\
+
+There are three conditions in the formatter logic that determines which formatter will be executed. The first is whether a user specified function is provided. If the user provides the formatter function for the Mapper and the Reducer, then this will take precedence. The second condition determines if the auto formatters are utilised. If the autoformatter argument is not set in HMR, then the formatter function for the Mapper and the Reducer will be set to the default formatter which reads all fields as character values. The last condition involves the decision between executing the dynamic approach or the static approach. By setting the autoformatter to TRUE, we execute the dynamic formatters, and FALSE for the static formatters.
+
+\subsection{Dynamic Formatter}
+
+When the dynamic approach is executed in HMR, we expect two auto formatter functions for the Mapper and the Reducer given that the Reduce job has been specified. The dynamic formatters are predefined code which takes the inferred vector of column types as the input argument. \\
+
+The Map formatter is specified using the code below. \texttt{formsep} is an arugment into HMR which the user specifies as the separator the input data structure. 
+
 \begin{verbatim}
-  ## formatter logic
-  map.formatter <- NULL
-  red.formatter <- NULL
-  if (!missing(formatter)) {
-    if (is.list(formatter)) {
-      map.formatter <- formatter$map
-      red.formatter <- formatter$reduce
-    } 
-    else map.formatter <- red.formatter <- formatter
-  }
-  else {
-    if (missing(autoformatter)) {
-      if (inherits(input, "hinput"))
-        map.formatter <- attr(input, "formatter")
-      if (is.null(map.formatter)) map.formatter <- .default.formatter
-      if (is.null(red.formatter)) red.formatter <- .default.formatter
-    }
-    else {
-      if (isTRUE(autoformatter)) {
-        map.formatter <- function(x) dstrsplit(x, coltypes(x), 
-        	sep=formsep, skip=TRUE)
-        if (!missing(reduce)) 
-          red.formatter <- function(x) dstrsplit(x, 
-          	coltypes(x, header=FALSE), nsep='\t')
-      }
-      else if (autoformatter==FALSE) {
+map.formatter <- function(x) dstrsplit(x, coltypes=coltypes(x), 
+            sep=formsep, skip=TRUE)
+\end{verbatim}
+
+If the Reduce process is specified, the Reduce formatter will take the following code. As we have a key-value structure, the key separator \texttt{nsep} is set to tab character.
+
+\begin{verbatim}
+if (!missing(reduce))
+      red.formatter <- function(x) dstrsplit(x, 
+          coltypes=coltypes(x, header=FALSE), nsep='\t')
+\end{verbatim}
+
+\subsection{Static Formatter}
+
+When the dynamic approach is executed in HMR, we expect two auto formatter functions for the Mapper and the Reducer given that the Reduce job has been specified. The static formatters are predefined in the logic which executes the \texttt{guess} function which executes the mapper process on a subset and returns the corresponding formatter functions. \\
+
+If the reduce process is not specified, the static approach will produce the formatter function for the Mapper only. It takes the code below which executes the \texttt{guess} function without the map process. This returns a single formatter for the Map process.
+
+\begin{verbatim}
+map.formatter <- guess(paste0(input,"/*"))
+\end{verbatim}
+
+If the Reduce process is specified, both the Reduce and Map formatter will be generated from the following code. The \texttt{guess} function is executed with the map input which output a list of two formatter functions for both the Mapper and the Reducer. The formatter function for the Mapper is allocated to the map formatter and likewise for the Reducer. 
+
+\begin{verbatim}
         if (!missing(reduce)) {
           formatter <- guess(paste0(input,"/*"), map=map)
           map.formatter <- formatter$map
           red.formatter <- formatter$reduce
         }
-        else map.formatter <- guess(paste0(input,"/*"))
-      }
-    }
-  }
-  \end{verbatim}
-
-
+\end{verbatim}
 
 \section{Examples}
 
@@ -767,14 +850,17 @@ There are advantages related to both auto formatting approaches as listed in the
 
 The issue around the header is resolved in the static approach. This is due the fact that we extract a subset of data ahead of time. After the mapper process is run on the subset data, the column names are assigned on the output which is used to infer and produce the reduce formatter. Hence the column names/headers can be utilised in writing the mapper and reducer function. 
 
-\item Empty subset\\ If the subset data from static approach turns out to be empty or contains descriptions rather than input data, we will not be able to infer the data type and hence will result in empty output. Because we base the structure of the complete data file on the subset, we need to ensure that the subset does not contain any missing or corrupted input. 
+\item Empty subset\\ If the subset data from static approach turns out to be empty or contains descriptions rather than input data, we will not be able to infer the data type and hence will result in empty output. For example, NA is interpreted as logical. If the fields in the subset all contain NA, then we will expect a logical vector. Because we base the structure of the complete data file on the subset, we need to ensure that the subset does not contain any missing or corrupted input. 
 
 The issue around empty subset is resolved in the dynamic approach as each chunk will generate a unique formatter. Although we expect that each individual chunk holds the same structure and data type, in the case where there may be differences including missing data, we can still rely on the dynamic approach to run successfully and generate an output. 
+
+\item Limitations of using autoformatter with user specified formatter function
+
 \end{enumerate}
 
 \section{Further Directions}
 
-We have focused on the formatters which reads data as the standard input from one source to another. In our case, we specifically focus on the input formatter of the mapper and the reduce in R. For future directions, we can also look at different methods of structuring data for the output of our mapper and reducer. Currently we leverage the as.output from the \pkg{iotools} package which preserves the R object as a raw vector. We can look at outputting the results of the mapper and reducer with a different formats that encode meta information in each record. A possibility could be JSON or XML formats that have a semi structure.
+We have focused on the formatters which reads data as the standard input from one source to another. In our case, we specifically focus on the input formatter of the mapper and the reduce in R. For future directions, we can also look at different methods of structuring data for the output of our mapper and reducer. Currently we leverage the as.output from the \pkg{iotools} package which preserves the R object as a raw vector. We can look at outputting the results of the mapper and reducer with a different formats that encode meta information in each record. By doing so, we may be able to resolve some of the limitations listed above. For example, the column names and other meta information could be preserved using JSON or XML formats with a semi structure.
 
 \chapter{References}
 1. BIG DATA: Challenges and opportunities, Infosys Lab Briefings,
