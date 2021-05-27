@@ -87,25 +87,15 @@ A dissertation submitted in partial fulfillment of the requirements for the degr
 
 \addcontentsline{toc}{chapter}{Abstract}
 
+MapReduce is a popular programming model for processing and analysing large data sets. The programs of MapReduce are parallel in nature, which can be implemented on large cluster of commodity machines. Thus it is very powerful for performing large-scale data analysis. \\
 
- Put your abstract  here.  The abstract should contain a brief summary of the aim, methodologies, 
-finding and conclusions of the dissertation.  The abstract should normally be fewer than 350 words.
+MapReduce allows the user to specify a map function that process values to generate a set of intermediate key-value pairs and a reduce function which merges all the intermediate key-value pairs with the same key. This process is enable in R through Hadoop Streaming. This is implemented using the\pkg{HMR} package which is a high performance MapReduce interface based on\pkg{iotools}. The performance comes from the ability to parse data in chunkwise operations as opposed to the classic row by row operations in the the\pkg{rmr} package.\\
 
+In order to execute the Map/Reduce tasks in R, input data is required to be parsed as R objects. In other words, a formatter is required for both the Map and the Reduce program. The formatter is a R function which defines the structure of the data by taking the raw input and converting it into a structured key-value object. The formatter function can easily be written for the Mapper this can be inferred from the input data in HDFS. However, the formatter function for the Reducer is difficult to write as there is no immediate access to the Mapper output in the MapReduce program. The motivation behind the project is to enhance the features of the\pkg{HMR} package through automating the detection of the formatter function by inferring the input data of the Map and Reduce tasks.\\
 
-One of the most widely used parallel programming models today is MapReduce. MapReduce is easy both to learn and use, and is especially useful in analyzing large datasets. While it is not suitable for several classes of scientific computing operations that are better served by message-passing interface or OpenMP, such as numerical linear algebra or finite element and finite difference computations, MapReduce's utility in workflows frequently called “big data” has made it a mainstay in high performance computing. This chapter introduces the MapReduce programming model and the Hadoop open-source framework which supports it.
+The package, source code and documentation can be acessed through the following url:\\
 
-Big data is concern massive amount, complex, growing data set from multiple autonomous sources. It has to deal with large
-and complex dataset that can be structured, semi-structured or unstructured and will typically not fit into memory to be processed.
-MapReduce is a programming model for processing large datasets distributed on a large clusters.A rapid growth of data in recent time,
-Industries and academia required an intelligent data analysis tool that would be helpful to satisfy the need to analysis a large amount of
-data. MapReduce framework is basically designed to compute data demanding applications to support effective decision making. Since
-its introduction, remarkable research efforts have been put to make it more familiar to the users subsequently utilized to support the
-execution of enormous data intensive applications. This survey paper highlights and investigates various applications using recent
-MapReduce models.
-
-
-motivations, 
-
+\url{https://github.com/nzha371/hmrtest}
 
 %: --------------------------------------------------------------
 %:                  END:  abstract
@@ -128,7 +118,7 @@ In this day and age, we have the ability to collect and store large volumes of d
 
 The article looks into computation of large data sets using Hadoop MapReduce. MapReduce is a processing technique and a program model for distributed computing based on java. The algorithm contains two important steps, Map and Reduce. The Map process (referred to as the Mapper) deals with the splitting and mapping of data followed by the Reduce process (referred to as the Reducer) which shuffle and aggregates the data that come out of the Mapper. The MapReduce model can be executed through Hadoop which is an open source software framework for storing data and running processes like MapReduce. The data is stored in the Hadoop Distributed File System (HDFS) which is a distributed file system which is used to scale a single Hadoop cluster to hundreds to even throughs of nodes (machines). Hadoop is also capable of running MapReduce programs written in various different languages such as R, Ruby, Python, C++. This is referred to as Hadoop Streaming.\\
 
-The main focus of the article is related to Hadoop Streaming specifically through R. The HMR package is used to execute Hadoop MapReduce jobs in R. It is available on Github under \url{https://github.com/s-u/hmapred}.  The purpose of the project is to explore methods to enhance the capabilities of HMR for executing MapReduce programs in R. The article explain concepts and idea of how streaming works and the current implementations using HMR. Then we shift our focus to the idea of formatters. Formatters define the structure of the input data to both the Map and the Reduce process and is crucial for the streaming and execution of the MapReduce job. We can easily infer the structure and data type of the values for the Mapper from the input in HDFS, however we have no option to do so for the Reducer input. This is due to system limitation where the Mapper output is not directly accessible in the process.\\
+The main focus of the article is related to Hadoop Streaming specifically through R. The HMR package is used to execute Hadoop MapReduce jobs in R. It is available on Github under \url{https://github.com/s-u/hmapred}. The purpose of the project is to explore methods to enhance the capabilities of HMR for executing MapReduce programs in R. The article explain concepts and idea of how streaming works and the current implementations using HMR. Then we shift our focus to the idea of formatters. Formatters define the structure of the input data to both the Map and the Reduce process and is crucial for the streaming and execution of the MapReduce job. We can easily infer the structure and data type of the values for the Mapper from the input in HDFS, however we have no option to do so for the Reducer input. This is due to system limitation where the Mapper output is not directly accessible in the process.\\
 
 The next part of the articles focus on the concept and implementations of auto detecting the formatter for the Mapper and the Reducer. By doing so, we ensure that the job runs successfully without losing out too much on the efficiency of the process. We implement two approaches that can automatically detect the formatter functions for both the Mapper and the Reducer. They are referred to as the Dynamic approach which detects the formatters during the MapReduce job, while the Static approach detects the formatters ahead of time, which is before the execution of the MapReduce job. Examples and results are provided on various MapReduce algorithms using the two approaches.\\
 
@@ -216,7 +206,7 @@ MapReduce is a processing technique/programming model for distributed computing 
 
 \includegraphics[width=8cm]{keyvalue} \\
 
-The algorithm operates on key-value pairs, which means that it takes a set of input key-value pairs and produces a set of output key-value pairs. In addition, the user is required to specify two functions for the Mapper and Reducer. The Mapper takes the input and produce the intermediate key-value pairs which is passed to the Reducer to create a set of output key-value pairs. The Reducer combines all the values associated with each key to create a smaller set of values. This enables us to input data that may be too large to fit in standard memory.\\
+The algorithm operates on key-value pairs, which means that it takes a set of input key-value pairs and produces a set of output key-value pairs. The input into the Mapper contains the key-value structure with the key begin the row number. Realistically, the input to the mapper only consist of values in a key-value structure. In addition, the user is required to specify two functions for the Mapper and Reducer. The Mapper takes the input and produce the intermediate key-value pairs which is passed to the Reducer to create a set of output key-value pairs. The Reducer combines all the values associated with each key to create a smaller set of values. This enables us to input data that may be too large to fit in standard memory.\\
 
 In the simplest form of the MapReduce model, the user only specifies the Map function. In this case, the output will consist of the intermediate key-value pairs which is ordered by the keys. 
 
@@ -351,7 +341,7 @@ Let us now explore how Hadoop streaming works.\\
 
 In the above example image, we can see that the flow shown is a basic MapReduce job. Our main focus will be on the processes in the Mapper and Reducer stream.
 
-\subsection{Input Format}
+\subsection{InputFormat}
 
 We have an Input Reader which defines the input specifications for the MapReduce job. it is responsible for reading the input data producing the structure for the Map process. We can read data from any source which may be structured or unstructured. This includes csv formats, delimiter formats, from a database table, images, audios etc. The only requirement to read all these types of data is that we have to create a particular input format for that data with these input readers. The input reader contains the complete logic about the data it is reading. We want to be able to structure the data in a way that the mapper can interpret and process. Hence we have to specify the logic which defines the structure of the input.
 
@@ -363,11 +353,9 @@ When the mapper is initiated, the input is broken down into multiple blocks know
 
 The reducer runs the same process as the mapper where the intermediate values are now parsed into the reduce program. The reducer runs the formatter function on the input key/value pairs followed by the execution of the reducer function that performs the calculation/ reduce job. Once the job is executed by the reduce program, the reducer converts its input key/value pairs into lines and converts into tab separated key-value pairs. The output of the reducer is the final output of the MapReduce job. 
 
-\subsection{Output Format}
+\subsection{OutputFormat}
 
-
-%%%%write on output format
-
+The OutputFormat determines where and how the the results of the job are persisted. It specifies how to seralize data by providing an implementation of RecordWriter. The RecordWriter handle the job of taking an individual key-value pair and writing it to the location prepared by the OutputFormat. There are two main functions of a RecordWriter which are 'write' and 'close'. The 'write' takes the output from the job and writes the bytes to disk, The default RecordWriter is LineRecorderWriter which writes the output as the key's bytes followed by a tab delimiter and the value's bytes followed by a new line. The 'close' function closes the Hadoop data stream to the output file. 
 
 \section{Advantages}
 
@@ -502,35 +490,28 @@ hinput("taxi/2015/01",
 
 \section{Motivation for Enhancements}
 
-So far we have looked at running the MapReduce program with only the Mapper. To format the input data for the mapper is relatively simple as we have visibility of the data which we can easily infer the class/data type. However, this is not as simple for the reducer as we have no visibility of the mapper output unless we run multiple processes, i.e. run the whole MapReduce process with the mapper only then use the output to format our input data to the reducer. We want to be able to run MapReduce as one process as opposed to having to resort to trial and error. 
-
-Hence our motivation is to automatically infer the class/data types for a structured data set
+So far we have looked at excuting the MapReduce program with only the Mapper. To infer the input data for the Mapper is relatively simple as we have visibility of the data in HDFS which we can easily infer the class/data type, however, this is not as simple for the Reducer.  As the output of the Mapper is parsed into the Reducer, we have no direct access to the Mapper output throughout the complete MapReduce job. This means we cannot infer the input data for the Reducer. If we attempt to write the formatter function for the Reducer, we may have to resort to trial and error to guess the input to the Reducer. An alternative approach is to first execute the job with only the Mapper process then use that output to infer the data for the Reducer. This method is inefficient, specifically when the purpose is to process and analyse large data sets. Our motivation is execute the MapReduce program without having to run multiple processes or resort to testing or guessing the Reducer formatter function.
 
 \chapter{Package Enhancement - Automation of Formatters}
 
-We know the importance of formatters with regards to writing the map and the reduce functions to execute the MapReduce job. Currently we do not have a way to automatically detect the formatter for our input data, and specifically for the Reducer. Writing the formatter for the Mapper is relatively easy as we can access the input data with ease, but it is not the same for the Reducer. Hence it is particularly difficult to write the reduce function as we do not have direct access to the intermediate key values that is outputted from the Mapper. 
+The current specifications in HMR allows the user to specify the formatter for the Mapper and the Reducer or the package defaults to the default formatter which is highly inefficient due to the variables being parsed as strings/characters. This may lead to running additional MapReduce jobs in order to reach the final desired output. It also adds more complex to the reducer function in the case where the data type may needs to be converted appropriately for the reducer to run successfully. 
 
-The current specifications in HMR allows the user to specify the formatter for the Mapper and the Reducer or the package defaults to the default formatter which is highly inefficient due to the variables being parsed as strings/characters. This may lead to running additional MapReduce jobs in order to reach the final desired output. It also adds more coding to the reducer function in the case where the data type may needs to be converted appropriately for the reducer to run successfully.
+We know the importance of formatters with regards to writing the map and the reduce functions to execute the MapReduce job. Our goal is to be able to efficiently execute the MapReduce program in R, however the current approach suggest that we have difficulty in the processing of the Reduce task in terms of formatting the input for the Reducer. The idea is for us to find a way to automatically detect the formatter function, and specially for the Reduce task. This feature is added to the\pkg{HMR} to increase efficiency and versatility for users of this package.
 
-%%%The issue with the default formatter is that it is highly inefficient to read in data as string/characters. It will also require additional coding in the map and reduce functions to convert the data types in order to run the job.
+We will look at how we can automate the formatter function for the Mapper and the Reducer using different approaches and at the same time provide customisations for the user to select between different formatting approaches.
 
-%gives user customisation
-The goal of this project is to automatically infer the data types for each variable in the input data to allow automatic detection of the formatter for the Map and Reduce processes using R functions and algorithms. We want to add this automation feature to HMR to increase efficiency and versatility for users of this package.
+\section{Concept around Auto Detection}
 
+We explored how to specify the formatter functions in\pkg{HMR} and we know drawbacks when the functions are not specified for the Mapper and Reducer. We will still provide the output with the cost of reduced efficiency as a result of using the \texttt{.default.formatter}. How can we simplify the steps and streamline the\pkg{HMR} package. In other words, how can we efficiently execute the MapReduce program in R without the need to manually specify the formatters. 
 
-\section{Concept of Auto Detection}
-
-We explored how to specify the formatter functions in HMR, and we know what happens when it is not specified in HMR. We will achieve our results with the cost of reduced efficiency as a result of using the default formatter. Our goal is to be able execute the MapReduce program in R without needing to manually specify the formatters. In other words, we want to simply and streamline the HMR package for the user. We can achieve this by using algorithm to automatically inferring the data type of the input.
-
-The idea is that we take a sample of the input data and use that to infer the data type for the values/attributes and return the formatter function to the formatter in HMR. There are two approaches that we can take to automatically detect the formatter function for the Mapper and the Reducer.
+This is achieved by using algorithm to inferring the data type from the input data to the Mapper and the Reducer. The idea is that we take a sample of the input data and use that to infer the data type for the values/attributes and assign the data types as column types to the formatter function. The formatter function is assigned to the Map/Reduce tasks for converting the data into a usable format. There are two approaches that we can take to infer the data type to automatically detect the formatter function for the Mapper and the Reducer.
 
 \begin{enumerate}
 \item Dynamic approach - generates and executes the formatter function during the Map and Reduce process (in between). Each process will be assigned a unique formatter function.
 \item Static approach - generates and executes a single formatter function for each Map and Reduce process prior to executing the complete MapReduce job (ahead of time). The single function will be applied to all Mapper and Reducers.
 \end{enumerate}
  
- The two approaches will have their advantages and drawbacks dependent on type of data that we are processing. We will discuss these at the end of the article.
-
+ The two approaches will have their advantages and drawbacks dependent on type of data that we are processing. We will discuss these towards the end of the article.
 
 \subsection{Auto Formatting - Mapper}
 
