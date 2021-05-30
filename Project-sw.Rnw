@@ -130,17 +130,17 @@ Lastly we conclude on the results and effectiveness of the enhancement in HMR as
 
 Big data concerns large amounts, complex and diverse sets of information that is growing at ever-increasing rates. The size of the data suggest that we will need to deviate from the traditional processing methodologies and to adapt an inexpensive and efficient way through distributed/parallel computing.\\
 
-Today, we can find upwards of 800 million webpages providing documentation on big data. Enthusiasts believe that Big Data is the next big thing after Cloud [1]. 
+Today, we can find upwards of 800 million webpages providing documentation on big data. Enthusiasts believe that Big Data is the next big thing after Cloud\cite{Infosys}.
 
 \section{Characteristics of Big Data}
 
-The concept of big data is generally vague without a formal definition, however the general consensus is that there are specific attributes that define big data The four characteristics of big data are Volume, Velocity, Variety and Veracity [2]. 
+The concept of big data is generally vague without a formal definition, however the general consensus is that there are specific attributes that define big data The four characteristics of big data are Volume, Velocity, Variety and Veracity\cite{Beakta15}. 
 
 \begin{center}
 \includegraphics[width=10cm]{bigdata}\\
 \end{center}
 
-The main characteristic that makes data “big” is its sheer volume. According to estimates by IBM, we can expect at least 40 Zettabytes (43 Trillion Gigabytes) of data to be created in 2020 [3]. The volume of data sets being processed and analysed has reached sizes larger than terabytes and even petabytes. This suggests that data sets these days are becoming too large to process within a single desktop machine/processor. \\
+The main characteristic that makes data “big” is its sheer volume. According to estimates by IBM, we can expect at least 40 Zettabytes (43 Trillion Gigabytes) of data to be created in 2020 [?????]. The volume of data sets being processed and analysed has reached sizes larger than terabytes and even petabytes. This suggests that data sets these days are becoming too large to process within a single desktop machine/processor. \\
 
 Velocity is the speed at which data is generated. High velocity data is generated with such a pace that it may require certain distributed processing techniques. Good examples of high velocity data includes social media posts.\\
 
@@ -190,7 +190,7 @@ For a single machine to handle more traffic, we can only scale vertically by upg
 
 \chapter{MapReduce Framework}
 
-At present, with data being generated at an exponential rate, there is the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. To handle such problem, Google developed the MapReduce programming model for distributed computing based on the Java language [5]. The programs of MapReduce are parallel in nature, thus are very useful for performing large scale data analysing using a distributed system with multiple machines in the cluster. 
+At present, with data being generated at an exponential rate, there is the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. To handle such problem, Google developed the MapReduce programming model for distributed computing based on the Java language\cite{Dean04}. The programs of MapReduce are parallel in nature, thus are very useful for performing large scale data analysing using a distributed system with multiple machines in the cluster. 
 
 \section{Concept of MapReduce}
 
@@ -234,7 +234,7 @@ Other advantages include cost efficiency, security and authentication, parallel 
 
 \chapter{The Hadoop Framework}
 
-Hadoop is Apache's free and open-source implementation of the MapReduce framework. Apache Hadoop offers reliable, scalable, parallel and distributed computing scaling up from a single server to a network of multiple computers[4]. It was developed with the purpose of having a data store that allow organisations to leverage big data analytics with cost efficiency in mind.\\
+Hadoop is Apache's free and open-source implementation of the MapReduce framework. Apache Hadoop offers reliable, scalable, parallel and distributed computing scaling up from a single server to a network of multiple computers\cite{Ghazi15}. It was developed with the purpose of having a data store that allow organisations to leverage big data analytics with cost efficiency in mind.\\
 
 %There are two main components of the Hadoop Framework: Storage and Processing
 
@@ -860,25 +860,9 @@ We have focused on the formatters which reads data as the standard input from on
 
 Currently we leverage the as.output from the \pkg{iotools} package which preserves the R object as a raw vector, however the headers do not get preserved. We can look at outputting the results of the mapper and reducer with a different formats that encode meta information in each record. By doing so, we may be able to resolve some of the limitations listed above. For example, the column names and other meta information could be preserved using JSON by including the column names for each record row.
 
-
-\chapter{References}
-1. BIG DATA: Challenges and opportunities, Infosys Lab Briefings,
-Vol 11 No 1, 2013. \\
-
-2. Big Data And Hadoop: A Review Paper, Rahul Beakta, 2015 \\
-
- 3. IBM Big Data analytics HUB,
-www.ibmbigdatahub.com/infographic/four-vs-big-data
-
-4. Hadoop, MapReduce and HDFS: A Developers Perspective, 
-Mohd Rehan Ghazi, Durgaprasad Gangodkar, 2015
-
-5. MapReduce: Simplified Data Processing on Large Clusters, 
-Jeffrey Dean and Sanjay Ghemawat
-
-6. iotools: High-Performance I/O Tools for R, 
-Taylor Arnold, Michael J. Kane, and Simon Urbanek
-
-%https://www.researchgate.net/publication/261450947_Converting_unstructured_and_semi-structured_data_into_knowledge
+\bibliographystyle{abbrv}
+\renewcommand{\bibname}{References} % changes the header; default: Bibliography
+\addcontentsline{toc}{chapter}{References}
+\bibliography{Project.bib}
 
 \end{document}
