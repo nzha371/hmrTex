@@ -84,11 +84,11 @@ A dissertation submitted in partial fulfilment of the requirements for the degre
 
 \addcontentsline{toc}{chapter}{Abstract}
 
-Big data is a term that describes the large volume of data – both structured and unstructured. However it is not the amount of data that’s important, rather, what people do with it. MapReduce is one popular programming model for processing and analysing large data sets. The programs of MapReduce are parallel in nature, which can be implemented on large cluster of commodity machines. Thus it is very powerful for performing large-scale data analysis. \\
+Big data is a term that describes the large volume of data – both structured and unstructured. However it is not the amount of data that is important, rather, what people do with it. MapReduce is one popular programming model for processing and analysing large data sets. The programs of MapReduce are parallel in nature, which can be implemented on large cluster of commodity machines. Thus it is very powerful for performing large-scale data analysis. \\
 
-MapReduce is implemented in Hadoop and through the Hadoop Streaming utility, data scientists can create and execute Map/Reduce jobs in different programs other than native Java. The focus will be Hadoop Streaming through R. The implementation in R is carried out using the\pkg{HMR} package. \\
+MapReduce is implemented in Hadoop and through the Hadoop Streaming utility, data scientists can create and execute Map/Reduce jobs in different programs other than native Java. The focus will be Hadoop Streaming through \R{}. The implementation in \R{} is carried out using the\pkg{HMR} package. \\
 
-In order to execute the Map/Reduce jobs in R, the input data is streaming to and from R. This is achieved through a formatter which defines the structure of the data as an R object. The formatter can easily be defined for the Map process as input can be inferred from HDFS. However, the formatter for the Reduce process is difficult infer as the Map output is streamed directly to the Reducer. Hence there is no direct access to the Reduce input to infer the formatter. The motivation behind the project is to enhance the features of the\pkg{HMR} package through automating the detection of the formatter function by inferring the input data of the Map and Reduce tasks. Through automation, we can reduce extra work required for formatting as well increased overall reliability in performing MapReduce using R.\\
+In order to execute Map/Reduce jobs in \R{}, input data need to parsed to \R{} as \R{} objects and back to Hadoop. This is achieved through a formatter which defines the structure of the data as an R object. The formatter can easily be defined for the Map process as input can be inferred from HDFS. However, the formatter for the Reduce process is difficult to infer as the Map output is streamed directly to the Reducer. Hence there is no direct access to the Reduce input to infer the formatter. The motivation behind the project is to enhance the features of the\pkg{HMR} package through automating the detection of the formatter function by inferring the input data of the Map and Reduce tasks. Through automation, we can reduce extra work required for formatting as well increased overall reliability in performing MapReduce using \R{}.\\
 
 The package, source code and documentation can be accessed through the following url:\\
 
@@ -111,51 +111,51 @@ The package, source code and documentation can be accessed through the following
 	
 \chapter{Introduction}%    \chapter{}  = level 1, top level
 
-In this day and age, we have the ability to collect and store large volumes of data, however, the question is whether we have the same ability to effectively parse and process data sets that are too big to store on individual computers. Storage and processing power may not be an issue with the development in technology, but this method is not cost effective for most users and companies that wish to analyse their data. The alternative is divide the data and process them across multiple machines. Even though the processes are spread across multiple machines, they appear as a single coherent system. This is referred to the distributed computing model.\\
+In this day and age, we have the ability to collect and store large volumes of data, however, the question is whether we have the same ability to effectively parse and process data sets that are too big to store on individual computers. Storage and processing power may not be an issue with the development in technology, but this method is not cost effective for most users and companies that wish to analyse their data. Chapter 2 illustrates the idea of 'Big Data', challenges and methods for storing large volumes of data.\\
 
-The article looks into computation of large data sets using Hadoop MapReduce. MapReduce is a processing technique and a program model for distributed computing based on Java. The algorithm contains two important steps, Map and Reduce. The Map process (referred to as the Mapper) takes a set of data and converts it into another set where the individual rows are in the key-value structure The Reduce process (referred to as the Reducer) takes the output from a Mapper as input and combines it into a smaller set of structured key-value output. As the sequence of the name MapReduce implies, the Reduce process is always performed after the Map process.
+Chapter 3 talks about the concept and computation of MapReduce. MapReduce is a processing technique and a program model for distributed computing based on Java. The model contains two important phases, namely Map and Reduce. The Reduce phase is executed after the Map phase as defined in the name of the model. The model can be executed through Hadoop which is an open source software framework for storing data and running processes like MapReduce. Data in Hadoop is stored in the Hadoop Distributed File System (HDFS) which is a distributed file system which is used to scale a single Hadoop cluster to hundreds to even throughs of nodes (machines). The Hadoop framework is discussed in detail in Chapter 4. An important feature of Hadoop is its ability to stream Map/Reduce jobs with executable scripts as the Mapper and Reducer using another program. This is referred to as Hadoop streaming. Features of Hadoop streaming is discussed in Chapter 5. \\
 
-The MapReduce model can be executed through Hadoop which is an open source software framework for storing data and running processes like MapReduce. The data is stored in the Hadoop Distributed File System (HDFS) which is a distributed file system which is used to scale a single Hadoop cluster to hundreds to even throughs of nodes (machines). An important feature of Hadoop is its ability to stream Map/Reduce jobs with executable scripts as the Mapper and Reducer in another program. This feature is referred to as Hadoop Streaming which allows Java and non-Java programmed jobs to be executed over the Hadoop cluster. 
+In Chapter 6 we go on talk about the execution of MapReduce programs specifically using \R{}\cite{R}. \R{} is a popular language among statisticians and data analysts. We focus on the\pkg{HMR}\cite{HMR} package in \R{} which implements Hadoop streaming to execute MapReduce jobs through a Hadoop cluster. It is available on Github under \url{https://github.com/s-u/hmapred}. We explain concepts and idea of how streaming works and the current implementations in\pkg{HMR}. Then we shift our focus to the idea of formatters. Formatters define the structure of the input data to both the Map and the Reduce process and is crucial for the streaming and execution of MapReduce. \\
 
-The main focus of the article is related to Hadoop Streaming specifically in R. The\pkg{HMR} package uses R to execute Hadoop MapReduce jobs through a Hadoop cluster. It is available on Github under \url{https://github.com/s-u/hmapred}. The purpose of the project is to explore methods to enhance the capabilities of\pkg{HMR}. The article explain concepts and idea of how streaming works and the current implementations using HMR. Then we shift our focus to the idea of formatters. Formatters define the structure of the input data to both the Map and the Reduce process and is crucial for the streaming and execution of the MapReduce job. We can easily infer the structure and data type of the values for the Mapper from the input in HDFS, however we have no option to do so for the Reducer input. This is due to system limitation where the Mapper output is not directly accessible in the process.\\
+Then we shift our focus to the purpose of this project: to explore methods for enhancing the capabilities of\pkg{HMR}. We will primarily focus on input formatting for parsing data from Hadoop to \R{}. This is to convert raw input data into an \R{] object. To format the input data for the Mapper is relatively straightforward as we can easily infer the input data stored in HDFS. On the other hand, to format the input data for the Reducer is not that simple as we do not have direct access to this input data as the input data to the Reducer is the output of the Mapper. This data is stored in HDFS, however it is not directly accessible in the MapReduce process due to system limitations. In Chapter 7, we discuss methods to automatically detect and infer the formatter for the Mapper and Reducer. By doing so, we can ensure that the process runs successfully without losing out too much on efficiency. We discover two approaches to automatically infer the formatter functions for both the Mapper and the Reducer. They are referred to as the Dynamic approach which detects the formatters during the MapReduce job, and the Static approach which detects the formatters ahead of time. Examples and results are provided on various MapReduce algorithms using the two approaches.\\
 
-The next part of the articles focus on the concept and implementations of auto detecting the formatter for the Mapper and the Reducer. By doing so, we ensure that the job runs successfully without losing out too much on the efficiency of the process. We implement two approaches that can automatically detect the formatter functions for both the Mapper and the Reducer. They are referred to as the Dynamic approach which detects the formatters during the MapReduce job, while the Static approach detects the formatters ahead of time, which is before the execution of the MapReduce job. Examples and results are provided on various MapReduce algorithms using the two approaches.\\
-
-Lastly we conclude on the results and effectiveness of the enhancement in HMR as well as providing future directions for further development.
+Lastly in Chapter 8, we conclude with some discussions around the effectiveness in the two auto detection approaches. We also discuss future directions for the\pkg{HMR} package with the focus on output formatting for the Mapper and Reducer. 
 
 \chapter{Concept of Big Data}
 
-Big data concerns large amounts, complex and diverse sets of information that is growing at ever-increasing rates. In 2010, Apache Hadoop defined "Big Data" as "datasets which would not be captured, managed, and processed by general computers within an acceptable scope\cite{Infosys}. Data sets can range from a few hundred gigabytes to zetabytes which is beyond the capacity of existing data management tools to capture, store, manage and analyse. The size of the data suggest that we will need to deviate from the traditional processing methodologies towards an inexpensive and efficient way. In addition to defining big data, we should understand how to effectively use the data to extract valuable information for decision making.
+Big data concerns large amounts, complex and diverse sets of information that is growing at ever-increasing rates. In 2010, Apache Hadoop defined "Big Data" as datasets which would not be captured, managed, and processed by general computers within an acceptable scope\cite{Infosys}. Data sets can range from a few hundred gigabytes to zetabytes which is beyond the capacity of existing data management tools to capture, store, manage and analyse. The size of the data suggest that we will need to deviate from the traditional processing methodologies towards an inexpensive and efficient way. In addition to defining big data, we should understand how to effectively use the data to extract valuable information for decision making.
 
 \section{Characteristics of Big Data}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\linewidth]{bigdata.pdf}\\
+\caption{Four 4V's of Big Data}
+\end{figure}
+
 The concept of big data is generally vague without a formal definition, however the general consensus is that there are specific attributes that define big data \cite{Beakta15}. The four characteristics of big data are Volume, Velocity, Variety and Veracity\cite{IBM}.\\
 
-\begin{center}
-\includegraphics[width=12cm]{bigdata}\\
-\end{center}
+The main characteristic that makes data “big” is its sheer volume. The \textbf{volume} of data sets being processed and analysed has reached sizes larger than terabytes and even petabytes. This suggests that data sets these days are becoming too large to process within a single desktop machine/processor. \\
 
-The main characteristic that makes data “big” is its sheer volume. The volume of data sets being processed and analysed has reached sizes larger than terabytes and even petabytes. This suggests that data sets these days are becoming too large to process within a single desktop machine/processor. \\
+\textbf{Velocity} is the speed at which data is generated. High velocity data is generated with such a pace that it may require certain distributed processing techniques. Good examples of high velocity data includes social media posts.\\
 
-Velocity is the speed at which data is generated. High velocity data is generated with such a pace that it may require certain distributed processing techniques. Good examples of high velocity data includes social media posts.\\
+\textbf{Variety} is the source of the data which can be found in different forms such as text, numerical, images, audio and video records. The variety in the data will require distinct processing capabilities or algorithms to handle different formats. \\
 
-Variety is the source of the data which can be found in different forms such as text, numerical, images, audio and video records. The variety in the data will require distinct processing capabilities or algorithms to handle different formats. \\
-
-Veracity is the quality of the data. Information may be volatile or incomplete seen in low veracity data sets containing a high percentage of meaningless data referred to as noise. On the other hand, high veracity data hold records that are valuable to analyse and contribute in a meaningful way to the overall results.
+\textbf{Veracity} is the quality of the data. Information may be volatile or incomplete seen in low veracity data sets containing a high percentage of meaningless data referred to as noise. On the other hand, high veracity data hold records that are valuable to analyse and contribute in a meaningful way to the overall results.
 
 \section{Structure of Big Data} 
 
-Big data can be categorised as unstructured or structured.\\
+Big data can be categorised as \emph{unstructured} or \emph{structured}.\\
  
-Unstructured data has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The unstructured data may be stored within non-relational databases like NoSQL\cite{noSQL}.\\
+\emph{Unstructured} data has its internal structure but it is not structured through pre-defined data models or schema. As it may comes in many different formats, it cannot be stored in relational databases which also becomes a real challenge for systems to process and analyse. The \emph{unstructured} data may be stored within non-relational databases like NoSQL\cite{noSQL}.\\
 
-Structured data, in contrast, is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with structured data include customer information, sales transactions, airline reservations systems, and billing systems. This type of structured data within relational databases can be accessed using Structured Query language (SQL)\cite{SQL}.\\
+\emph{Structured data}, in contrast, is usually stored and managed in relational databases with predefined data models. Examples of relational database applications with \emph{structured} data include customer information, sales transactions, airline reservations systems, and billing systems. This type of \emph{structured} data within relational databases can be accessed using Structured Query language (SQL)\cite{SQL}.\\
  
  \section{Challenges around Big Data}
  
  \subsection{Converting Unstructured Data}
  
-In data processing, we come across the term knowledge discovery\cite{data}. Knowledge discovery from textual databases refers generally to the process of extracting interesting or non-retrieval patterns or knowledge from unstructured or structured data data. The challenge today is that bulk of the data we have and store do not come in a nice structure that we can easily access and understand. In managing unstructured data, many organisations simply collect and store significant volumes of unstructured information without having the ability to process and interpret it. This is due to the difficulty and cost of exploring it. However, it is not to say there is no way of processing unstructured data. There is simply not a standard, or a single conventional method of processing such data. There are ways that structured data can be created from unstructured data through various processing methods. \\
+In data processing, we come across the term \emph{knowledge discovery}\cite{data}. \emph{Knowledge discovery} from textual databases refers generally to the process of extracting interesting or non-retrieval patterns or knowledge from unstructured or structured data. The challenge today is that bulk of the data we have and store do not come in a nice structure that we can easily access and understand. In managing unstructured data, many organisations simply collect and store significant volumes of unstructured information without having the ability to process and interpret it. This is due to the difficulty and cost of exploring it. However, it is not to say there is no way of processing unstructured data. There is simply not a standard, or a single conventional method of processing such data. There are ways that structured data can be created from unstructured data through various processing methods. \\
 
 When converting from unstructured data to structured data, the question we often ask is what data do we wish to extract? Is it a word count index or is it a particular feature, topic or sentiment? Then we want to explore what the structure look like. Is it key value pairs, JSON, XML, or Tabular form? In processing unstructured data, we analyse the data and retrieve a structured metadata that augments the original data source. The alternative is to extract and clean the data if we already know what features we wish to extract. \\
 
@@ -167,35 +167,42 @@ Apart from the challenge of extracting knowledge from unstructured data, we are 
 
 \subsubsection{Serial vs Parallel Computing}
 
-In the early days of computing, programs were serial, which means a program consisted of a sequence of instructions where each instruction is executed one after the other. It ran from start to finish on a single machine. Since then, parallel computing is developed as a means of improving performance and efficiency. In a parallel program, the processing is broken into parts where each part can be executed concurrently. The instructions from each part runs simultaneously on different cores. These cores can exist on a single machine or they can be distributed on a cluster of machines connected to a network. 
+In the early days of computing, programs were serial, which means a program consisted of a sequence of instructions where each instruction is executed one after the other. It ran from start to finish on a single machine. Since then, parallel computing is developed as a means of improving performance and efficiency\cite{Para}. In a parallel program, the processing is broken into parts where each part can be executed concurrently. The instructions from each part runs simultaneously on different cores. These cores can exist on a single machine or they can be distributed on a cluster of machines connected to a network. 
 
 \subsubsection{Scaled Distributed Computing}
 
-Distributed computing involves multiple computers, physical servers, virtual machines, containers or any other node that communicate and coordinate actions in order to appear as a single coherent system\cite{dcomp}. In its most simplest form, it is a group of computers working together as a single computer to the end user. These machines have a shared state, operates in parallel and can fail independently without affecting the whole system's uptime. \\
+Distributed computing involves multiple computers, physical servers, virtual machines, containers or any other node that communicate and coordinate actions in order to appear as a single coherent system\cite{dcomp}. In its most simplest form, it is a group of computers working together as a single computer to the end user. These machines have a shared state, operate in parallel and can fail independently without affecting the whole system's uptime. \\
 
-The diagram on the next page shows a cluster with 6 machines.
+Figure \ref{fg:ds} illustrates a cluster with 6 machines.\\
 
-\begin{center}
-\includegraphics[width=12cm]{distributed} \\
-\end{center}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{distributed.pdf}\\
+\caption{Distributed System}
+\label{fg:ds}
+\end{figure}
 
 For a single machine to handle more traffic, we can only scale vertically by upgrading the hardware of the machine. What a distributed system enables us to do is scale horizontally. To scale horizontally simply means to add more computers rather than upgrading the hardware of a single machine. This is significantly cheaper than vertical scaling. We will discuss further advantages of a distributed system in the chapters below.
 
 \chapter{MapReduce Framework}
 
-With data being generated at an exponential rate, there was the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. MapReduce is such a program that is capable of processing and generating large data sets\cite{Dean04}.Programmers often find the system easy to use with hundreds of MapReduce programs have been implemented and upwards of one thousand MapReduce jobs are executed on Google’s clusters every day. \\
+With data being generated at an exponential rate, there was the need to deploy data intensive application and storage clusters in order to keep up with the amount of data. MapReduce is such a program that is capable of processing and generating large data sets\cite{Dean04}. Programmers often find the system easy to use with hundreds of MapReduce programs implemented and upwards of one thousand MapReduce jobs being executed on Google’s clusters every day. \\
 
 The programs of MapReduce are parallel in nature, thus are very useful for performing large scale data analysis executed on a distributed system with multiple machines in the cluster. The run-time system takes care of the details of partitioning input data, scheduling the program's execution across multiple machines, handling failures, and managing inter-machine communications. This allows users without any experience with parallel and distributed systems to easily utilize the resources of a distributed system. 
 
 \section{Concept of MapReduce}
 
 There are multiple approaches for processing relatively smaller datasets, however larger datasets require a different approach specifically for data that is too big to fit in memory. The traditional approach to process data on a single machine is to break data into individual chunks which is then loaded and processed sequentially on the machine. \\
+\newline
+
+\begin{figure}
+\centering
+\includegraphics[width=0.75\linewidth]{keyvalue.pdf}\\
+\caption{Key-Value Structure}
+\label{fg:kv}
+\end{figure}
 
 MapReduce is a processing technique/programming model for distributed computing. The MapReduce program works in two phases, namely Map and Reduce. The computation takes a set of input values with a defined structure and produces a set of output values with a structure. The structure is typical in the form of key value pairs. \\
-
-\begin{center}
-\includegraphics[width=12cm]{keyvalue.pdf} \\
-\end{center}
 
 The Map program and the Reduce program essentially takes the structured input and executes two user specified functions: Map and Reduce. The Map function written by the user takes an input pair, executes the mapping and outputs a set of intermediate key-value pairs. The intermediate values associated with the same intermediate key are then passed to the Reducer. The Reduce function also written by the user, takes the output of the Map program in the key-value pair structure and merges together these values associated with the individual keys to form a smaller set of combined values. The intermediate values are supplied to the Reduce program via an iterator which allows us to handle large amounts of data that are too large to fit in memory.\\
 
@@ -207,21 +214,24 @@ In the simplest form of the MapReduce model, the user only supplies the Map func
 The complete MapReduce process consists of four operations namely, Split, Map, Shuffle \& Sort and Reduce. The split is handled by the MapReduce framework, the mapping is handled by the Map program, shuffle \&sort is also handled by the framework and reduce is handled by the Reduce program.\\
 
 \begin{enumerate} 
-\item{Splitting} - the process whereby larger data sets are split into smaller data sets based on the block size. The default size of each block is 128MB, however this can be adjusted by the user. The number of Mappers allocated will depend on the number of blocks generated by the split, i.e. if there are 3 blocks then there will only be 3 Mappers.
-\item{Mapping} - the purpose of the Mapper is to process the input data. In this phase, data in each chunk is passed to a user specified Map function which is executed and returns output in the form of key-value pairs. For example, if a file contains 100 blocks to be processed, you can have 100 Mappers which can run simultaneously to process one block each or have 50 Mappers running together to process two blocks each. The framework decides how many Mappers to allocate based on the memory block on each node.\\
-\item{Shuffling \& Sort} - the shuffle and sort phase is together. It essentially transfers the Map output from the Mapper to the Reducer. The sorting covers the merging and sorting of Map outputs. The data from all Mappers are grouped by the key, split among the Reducers and sorted by the key. The shuffle and sort phase occur simultaneously and are done by the MapReduce framework. This stage is necessary for the Reducers, otherwise there will be no input for them. Note that shuffle shuffle \& sort is not performed at all if zero reducers are specified in the job.
-\item{Reducing} - the Reducer is guaranteed to have all records associated with each key. In this phase, the key-value output from the shuffling stage are aggregated. It is important to note that one key can only be in a single Reducer, else the aggregation will be non-functional. In other words, this operation is a summary of the complete dataset. 
+\item\textbf{Splitting} - the process whereby larger data sets are split into smaller data sets based on the block size. The default size of each block is 128MB, however this can be adjusted by the user. The number of Mappers allocated will depend on the number of blocks generated by the split, i.e. if there are 3 blocks then there will only be 3 Mappers.
+\item\textbf{Mapping} - the purpose of the Mapper is to process the input data. In this phase, data in each chunk is passed to a user specified Map function which is executed and returns output in the form of key-value pairs. For example, if a file contains 100 blocks to be processed, you can have 100 Mappers which can run simultaneously to process one block each or have 50 Mappers running together to process two blocks each. The framework decides how many Mappers to allocate based on the memory block on each node.\\
+\item\textbf{Shuffling \& Sort} - the shuffle and sort phase is together. It essentially transfers the Map output from the Mapper to the Reducer. The sorting covers the merging and sorting of Map outputs. The data from all Mappers are grouped by the key, split among the Reducers and sorted by the key. The shuffle and sort phase occur simultaneously and are done by the MapReduce framework. This stage is necessary for the Reducers, otherwise there will be no input for them. Note that shuffle shuffle \& sort is not performed at all if zero reducers are specified in the job.
+\item\textbf{Reducing} - the Reducer is guaranteed to have all records associated with each key. In this phase, the key-value output from the shuffling stage are aggregated. It is important to note that one key can only be in a single Reducer, else the aggregation will be non-functional. In other words, this operation is a summary of the complete dataset. 
 \end{enumerate}
 
 \subsection{Example}
 
-Below is an example of how MapReduce work.\\
+Figure~\ref{fig:mr-ex} illustrates the MapReduce process. The Map algorithm associates the count value 1 with each entry which is defined as the key. The Reduce algorithm is the summation of the count value associated with each key. 
 
-\includegraphics[width=15cm]{mapreduce.pdf} \\
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{mapreduce.pdf}
+\caption{MapReduce process}
+\label{fig:mr-ex}
+\end{figure}
 
-The Mapper algorithm maps the count with the keys. The Reducer algorithm is the summation of the count for each unique key.\\
-
-Suppose we have 3 lines of simple input data consisting of 4 animals types: dog, cat, pig and bird. The input is then separated into individual splits which is then mapped in the Mapper where each animal value is assigned to a count. The output goes through shuffle and sort where each split is now grouped by the animal type as the key. The Reducer takes the new splits and sums up all the values for each animal type. The result is the unique animals type as the key and the total count of animal.
+Suppose we have 3 lines of simple input data consisting of 4 animals types: dog, cat, pig and bird. The input is then separated into individual splits which is then mapped in the Mapper where each animal type is a key and is assigned to a count 1. The output goes through shuffle \& sort where the Mapper output is now grouped by the animal type as the key. In the example, 2 Reducers are specified. The same type of animals are grouped into one Reducer. As there are 4 types of animals, each Reducer receives 2 animal types (2 keys each). The Reducer sums up all the count values for each animal type. The output is the unique animals type as the keys and the total count value associated with the animal type.
 
 \chapter{The Hadoop Framework}
 
@@ -231,44 +241,53 @@ Hadoop is Apache's free and open-source implementation of the MapReduce framewor
 
 \section{Hadoop Architecture}
 
-Hadoop follows a master/slave architecture design for data storage and distributed data processing using HDFS and MapReduce respectively\cite{HDFS}. The master node for data storage is NameNode while the master node for parallel processing is the Job Tracker. The slave nodes are comprised of other machines in the Hadoop cluster which stores the data and performs the computations. Each slave node have a DataNode and a TaskTracker that synchronises the process respectively. \\
+\begin{figure}[h]
+\centering
+\includegraphics[width=.95\linewidth]{hadoop.pdf}
+\caption{Hadoop System}
+\label{fig:hs}
+\end{figure}
 
-The Hadoop system can be set up via cloud or locally.
-
-\begin{center}
- \includegraphics[width=15cm]{hadoop.pdf}\\
- \end{center}
+Figure \ref{fig:hs} illustrates the Hadoop Architecture comprised of two components. Hadoop follows a master/slave architecture design for data storage and distributed data processing using HDFS and MapReduce respectively\cite{HDFS}. The master node for data storage is NameNode while the master node for parallel processing is the Job Tracker. The slave nodes are comprised of other machines in the Hadoop cluster which stores the data and performs the computations. Each slave node have a DataNode and a TaskTracker that synchronises the process respectively. The Hadoop system can be set up via cloud or locally.
 
 \section{Storage - HDFS}
 
-The storage component of the Hadoop architecture is known as the Hadoop Distributed File System (HDFS)\cite{HDFS}. The NameNode runs on the master node and manages metadata about the file system in a file named fsimage. This metadata is cached in main memory to provide faster access to the clients on read/write requests. The NameNode controls also manages the slaves by splitting files into chunks (default 64 megabytes) and distributing them across each DataNode in the cluster. The DataNodes are primary storage elements of HDFS where chunks of data are stored and replicated according to the instructions from the NameNode. Secondary NameNode is to periodically read the file system and log changes. \\
+The storage component of the Hadoop architecture is known as the Hadoop Distributed File System (HDFS)\cite{HDFS}. The NameNode runs on the master node and manages metadata about the file system in a file named fsimage. This metadata is cached in main memory to provide faster access to the clients on read/write requests. The NameNode controls also manages the slaves by splitting files into chunks (default is 128MB) and distributing them across each DataNode in the cluster. The DataNodes are primary storage elements of HDFS where chunks of data are stored and replicated according to the instructions from the NameNode. The Secondary NameNode is a helper node which is available in the case that the NameNode fails. \\
 
-The main advantages of HDFS is data locality and fault tolerance. Data locality allow the nodes to manipulate the data they have access to which results in faster and more efficient processing while handling faults through the process of replicating files across each slave node. \\
+The main advantages of HDFS is data locality and fault tolerance. Data locality allow the nodes to manipulate the data they have access to which results in faster and more efficient processing while handling faults through the process of replicating files across multiple slave node. \\
 
-\includegraphics[width=11cm]{hdfs.pdf}
+\begin{figure}[h]
+\centering
+\includegraphics[width=.9\linewidth]{hdfs.pdf}
+\caption{HDFS}
+\label{fig:hdfs}
+\end{figure}
 
 \section{Fault Tolerance in HDFS}
 
 Fault tolerance refers to the ability for the system to handle unfavourable conditions, such as the failure of machine in the HDFS cluster. Fault is handled through the process of replica creation, which is to replicate the data on different machines in the HDFS cluster. So whenever a machine fails, the data can be accessed from other machines in which the same copies of data were created.\\
 
-Suppose the user stores a file XYZ. HDFS will break this file into blocks, say A, B, and C. Let’s assume there are four DataNodes, say D1, D2, D3, and D4. HDFS creates replicas of each block and stores them on different nodes to achieve fault tolerance. For each original block, there will be two replicas stored on different nodes.\\
+Suppose the user stores a file XYZ illustrated in Figure \ref{fig:ft-tol} below. HDFS will break this file into blocks, say A, B, and C. Let’s assume there are four DataNodes, say D1, D2, D3, and D4. HDFS creates replicas of each block and stores them on different nodes to achieve fault tolerance. For each original block, there will be two replicas stored on different nodes.\\
 
-\includegraphics[width=11cm]{faulttol.pdf}\\
+\begin{figure}[h]
+\centering
+\includegraphics[width=.8\linewidth]{faulttol.pdf}
+\caption{Example of fault tolerance}
+\label{fig:ft-tol}
+\end{figure}
 
-Let the block A be stored on DataNodes D1, D2, and D4, block B stored on DataNodes D2, D3, and D4, and block C stored on DataNodes D1, D2, and D3. If DataNode D1 fails, the blocks A and C present in D1 are still available to the user from DataNodes (D2, D4 for A) and (D2, D3 for C).\\
-
-Hence when one node breaks down, there won't be data lost. 
-
-%insert diagram
+Let the block A be stored on DataNodes D1, D2, and D4, block B stored on DataNodes D2, D3, and D4, and block C stored on DataNodes D1, D2, and D3. If DataNode D1 fails, the blocks A and C present in D1 are still available to the user from DataNodes (D2, D4 for A) and (D2, D3 for C). Hence when one node breaks down, there won't be data lost. 
 
 \section{Processing - MapReduce}
 
-In a MapReduce job, the input is broken down into multiple chunks which are processed by the Map phase and then the output of the Map phase is passed as input to the Reduce phase. The input and output files are stored in the file system, while the output of the Map phase (known as intermediate results) are only stored temporarily in the process. As the process runs in parallel, the Reduce task on specific nodes may begin once its Map tasks is complete rather than waiting on all Map tasks to complete.\\
+Now we look at the processing component of Hadoop which is MapReduce. In a MapReduce job, the input is broken down into multiple chunks which are processed by the Map phase and then the output of the Map phase is passed as input to the Reduce phase. The input and output files are stored in the file system. Similar to HDFS, the MapReduce process also utilises the master/slave architecture in which the JobTracker runs on the master node while the TaskTracker runs on each slave node. Figure \ref{fig:process} illustrates the processing component of the Hadoop framework.\\
 
-Similar to HDFS, the MapReduce process also utilises the master/slave architecture in which the JobTracker runs on the master node while the TaskTracker runs on each slave node. \\
-\newline
-
-\includegraphics[width=14cm]{jobtracker.pdf}\\
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{jobtracker.pdf}
+\caption{Processing Component}
+\label{fig:process}
+\end{figure}
 
 
 The JobTracker monitors the MapReduce tasks carried out by the TaskTracker running on the slave nodes. The user will only interact with the master node by submitting jobs to the JobTracker. The JobTracker then locates and submits the jobs to the TaskTracker. The slave nodes are monitored by the JobTracker through heartbeat signals to determine whether a node has failed. The JobTracker is a point of failure for the Hadoop MapReduce service and if it goes down, all jobs will be stopped\cite{Ghazi15}. \\
@@ -281,9 +300,11 @@ In the case the JobTracker does not receive any heartbeat from a TaskTracker for
 
 \section{What is Streaming}
 
-\includegraphics[width=14cm]{streaming.pdf}\\
-
 When we think of a stream we often picture water flowing through a fixed channel or pipe. Likewise in computer programming, it refers to the flow of data. A stream is basically a sequence of data bits made available over time from one node to another. From one program to the next, each channel involves depicted by the arrow is a pipe, which includes standard input and standard output. The program can get input from a source by reading in data as standard input. This input is the standard output of the source. Likewise, the standard output of the program is read into the destination as standard input. \\
+
+\begin{center}
+\includegraphics[width=12cm]{streaming.pdf}\\
+\end{center}
 
 We refer to the complete process as a stream. In terms of Hadoop Streaming, the data is streamed from HDFS to another program and back to HDFS.
 
@@ -291,7 +312,7 @@ We refer to the complete process as a stream. In terms of Hadoop Streaming, the 
 
 Hadoop streaming makes use of the streaming process which we discussed earlier. It is a utility that comes with the Hadoop distribution which allow users to create and run MapReduce jobs to be executed in the Hadoop cluster using other languages\cite{Stream11}. By default the Hadoop MapReduce framework is written in Java and provides support for writing Map and Reduce programs in Java only. However the streaming utility enables pipes between Hadoop and our MapReduce program using any language that can read standard input and write to standard output for writing our MapReduce program. MapReduce programs can be written in multiple languages such as R, Python, Perl, PHP, C++, etc. The utility is packed in a JAR file\cite{JAR}. \\
 
-With the capability to write executable functions for the Map and Reduce program in another program other than Java, one can utilize and execute MapReduce jobs without needing any knowledge of Java.
+With the capability to write executable functions for the Mapper and Reducer in a program other than Java, one can utilize and execute MapReduce jobs without needing any knowledge of Java.
 
 \section{Syntax}
 
@@ -305,17 +326,18 @@ The syntax below is used to executed MapReduce code written in a different langu
     -reducer "awk '{n=n+$1}END{print n}'"
 \end{verbatim}
 
-The input command is used to provide the directory of the input where the output command is used to provide the output directory. The Map command is used to specify the executable Mapper command while the Reducer command is used to specify the executable Reducer command. 
-
-In the example above, myInputDirs is the input directory for the Mapper and myOutputDir is the output directory for the Reducer. The Mapper executes the word count linux command on the input data which is passed to the Reducer which aggregates result of the word count as a total and then returns the output to the output directory. 
+The input command is used to provide the directory of the input where the output command is used to provide the output directory. The \code{-mapper} argument is used to specify the executable Mapper command while the \code{-reducer} argument is used to specify the executable Reducer command. \code{myInputDirs} is the input directory for the Mapper and \code{myOutputDir} is the output directory for the Reducer. The Mapper executes the word count unix command on the input data which is passed to the Reducer which aggregates result of the word count as a total and then returns the output to the output directory. 
 
 \section{Implementation of Hadoop Streaming}
 
-Let us now explore how Hadoop streaming works.\\
-\newline
-\includegraphics[width=16cm]{hdstream.pdf}\\
+In the above example image, we can see that the flow shown is a basic MapReduce job. Our main focus will be the streaming of data for the Map and the Reduce program. Let us now explore how Hadoop streaming works in Figure \ref{fig:hd-stream}.
+\pagebreak
 
-In the above example image, we can see that the flow shown is a basic MapReduce job. Our main focus will be on the processes in the Mapper and Reducer stream.
+\begin{figure}
+\includegraphics[width=1\textwidth]{hdstream.pdf}\\
+\caption{Hadoop Streaming Process}
+\label{fig:hd-stream}
+\end{figure}
 
 \subsection{InputFormat}
 
@@ -345,61 +367,53 @@ Below are some of the advantages of using Hadoop Streaming.
 \item Testing - input and output data can be tested quickly by using it with Unix or command line tools.
 \end{enumerate}
 
-\chapter{HMR Hadoop MapReduce Package for \R}
+\chapter{HMR Hadoop MapReduce Package for \R{}}
 
-We have discuss all about the wonderful capabilities of MapReduce and its ability to handle large data sets. However many programmers have not been exposed to it due not having much background in Java. The goal is to be make executing MapReduce programs more effortless. We will be using R to stream and execute MapReduce jobs in the Hadoop cluster\cite{R}. \\
+We have discussed all about the wonderful capabilities of MapReduce and its ability to handle large data sets. However many programmers have not been exposed to it due not having much background in Java. The goal is to make executing MapReduce programs more effortless. We will be using \R{} to stream and execute MapReduce jobs in the Hadoop cluster\cite{R}. \\
 
-Currently there are packages in R that is capable of executing MapReduce programs. These include packages such as \pkg{rmr2}. The drawback of these packages are that they still require Java-like coding as well as reduced efficiency due to the way that data is streamed. It follows the traditional method where data is read into R line by line. What if we have a package that can address these drawbacks? \\
+Currently there are packages in \R{} that is capable of executing MapReduce programs. These include packages such as\pkg{rmr2}. The drawback of these packages are that they still require Java-like coding as well as reduced efficiency due to the way that data is streamed. It follows the traditional method where data is read into \R{} line by line. What if we have a package that can address these drawbacks? \\
 
-HMR is such a package that addresses these drawbacks.\pkg{HMR} is a package developed in \R\ which acts as an interface which give users the ability to execute Hadoop MapReduce jobs directly through \R\cite{HMR}. The MapReduce job can be completely submitted using \R\ without the user having to access Hadoop or code in Java. The package enables Hadoop streaming as it allows the user to specify the Input Format, the Map and Reduce function, and the Output Format through \R\ functions and \R\ data structures such as matrices and data frames. High efficiency is achieved through parsing data in binary and utilises chunk-wise processing as well as automated conversion to and from \R\ objects. This enables a smooth and efficient transition between \R\ and Hadoop. 
+\pkg{HMR} is such a package that addresses these drawbacks.\pkg{HMR} is a package developed in \R{} which acts as an interface which give users the ability to execute Hadoop MapReduce jobs directly through \R\cite{HMR}. The MapReduce job can be completely submitted using \R{} without the user having to access Hadoop or code in Java. The package enables Hadoop streaming as it allows the user to specify the Input Format, the Map and Reduce function, and the Output Format through \R{} functions and \R{} data structures such as matrices and data frames. High efficiency is achieved through parsing data in binary and utilises chunk-wise processing as well as automated conversion to and from \R{} objects. This enables a smooth and efficient transition between \R{}and Hadoop. 
 
 \section{Concept of Formatting - Specifying Structure for Input Data}
 
-When data is streamed from an external source into \R, we need to define the structure of the data file for \R\ to interpret. \\
+When data is streamed from an external source into \R{}, we need to define the structure of the data file for \R{} to interpret. \\
 
-Below is an example of parsing data from local disk to R. We use the \R\ function read.table to illustrate how data is parsed. We added specifications on how the data is read into \R. To ensure the data is read in correctly, we can specify the header, the separator symbol for each attribute, the data type for each attribute and the number of rows. 
+Below is an example of parsing data from local disk to R. We use the \R{} function \code{read.table} to illustrate how data is parsed. We added specifications on how the data is read into \R{}. To ensure the data is read in correctly, we can specify the header, the separator symbol for each attribute, the data type for each attribute and the number of rows. 
 
-\begin{verbatim}
-> d <- read.table(file="data/taxi.csv", header=TRUE, sep=",", 
-				colClasses=c("integer", "numeric", logical", 
-             rep("character", 6), nrows=5)
-             
-> d[,c(1,3,4,5)]
-  VendorID tpep_dropoff_datetime passenger_count trip_distance
-1        2   2015-01-15 19:23:42               1          1.59
-2        1   2015-01-10 20:53:28               1          3.30
-3        1   2015-01-10 20:43:41               1          1.80
-4        1   2015-01-10 20:35:31               1           .50
-5        1   2015-01-10 20:52:58               1          3.00
-\end{verbatim}
+<<>>=
+read.table(file="taxi.csv", header=TRUE, sep=",", nrows=5,
+           colClasses=c("integer", "character", "character",
+                        "integer", "numeric"))
+@
 
-The consequence of incorrectly parsing data into \R\ will lead to issues when we try to compute on the data later on. 
+The consequence of incorrectly parsing data into \R{} will lead to issues when we try to compute on the data later on. 
 
 \section{Formatter in\pkg{HMR}}
 
-When we stream data from Hadoop, we are essentially creating a connection between HDFS and \R. The above example works great when we can read in data from a structured file. What if our data file is not structured in a way we can easily read, or what if the parsing method are too slow for us to read efficiently. \\
+When we stream data from Hadoop, we are essentially creating a connection between HDFS and \R{}. The above example works great when we can read in data from a structured file. What if our data file is not structured in a way we can easily read, or what if the parsing method are too slow for us to read efficiently. \\
 
-The solution is to write a \R\ function that defines the structure of the input data we want to parse. We call this the Formatter. With the formatter function, we can parse any type of data. In the\pkg{HMR} package, we provide the specifications to the formatter function, or in other words, the metadata which is the data that provides information about our data file. This includes information like the separator we use for each field, how many fields we have, the classes/ data types of our fields, etc.
+The solution is to write a \R{} function that defines the structure of the input data we want to parse. We call this the \emph{formatter}. With the \emph{formatter} function, we can parse any type of data. In the\pkg{HMR} package, we provide the specifications to the \emph{formatter} function, or in other words, the metadata which is the data that provides information about our data file. This includes information like the separator we use for each field, how many fields we have, the classes/ data types of our fields, etc.
 
-\section{Hadoop Streaming in \R}
+\section{Hadoop Streaming in \R{}}
 
-We have discussed the idea of how Hadoop Streaming works, let us now see how we can stream the MapReduce process in R using the HMR package. The HMR package is essentially a Hadoop streaming API which runs in \R\. This allows the user to run MapReduce jobs and write formatter functions in \R\ as opposed to writing scripts in the native language Java. \\
+We have discussed the idea of how Hadoop Streaming works, let us now see how we can stream the MapReduce process in R using the HMR package. The HMR package is essentially a Hadoop streaming API which runs in \R{}. This allows the user to run MapReduce jobs and write formatter functions in \R{} as opposed to writing scripts in the native language Java. \\
 
 The first step is to specify the connection which is to define the HDFS path and input source. Once we have the connection established, the data can be parsed into R. The data is separated into blocks consisting of lines/rows referred to as chunks and the data is parsed as raw bytes which is much more efficient than parsing data as character values or any other data types. \\
 
-For R to process the MapReduce program, we will need to format each chunk of data to a structure that \R\ can interpret. This is the next step to specify the formatter functions for the Mapper and the Reducer. In \R\, this involves writing function that will convert the raw bytes into any \R\ object with data frames being the most prevalent structure as the the records can be easily expressed with rows and attributes (fields) as the columns. Within each column, we can also specify the class/data type associated with each field. The default classes in \R\ include integer, numeric, logical, character, complex, POSIXct, etc. The structure of the data as a result of executing the formatter should return an \R\ object typically in the form of a matrix or data frame.\\
+For R to process the MapReduce program, we will need to format each chunk of data to a structure that \R{} can interpret. This is the next step to specify the formatter functions for the Mapper and the Reducer. In \R{}, this involves writing function that will convert the raw bytes into any \R{} object with data frames being the most prevalent structure as the the records can be easily expressed with rows and attributes (fields) as the columns. Within each column, we can also specify the class/data type associated with each field. The default classes in \R{} include integer, numeric, logical, character, complex, POSIXct, etc. The structure of the data as a result of executing the formatter should return an \R{} object typically in the form of a matrix or data frame.\\
 
-The next step is to specify the Map and Reduce functions for the Mapper and the Reducer. The nice thing here is that our functions are no longer in Java, we can simply write these function using \R\ code to process and compute on the R data object which we have just converted. Each chunk of data will be associated with each Map process. The Mapper takes in the R object consisting of values and executes the user defined Map function. The Map function identifies the keys from the values associated with it and generates the output \R\ data frame with the key and value/s separated by a delimiter. The default delimiter is a tab character, however this can also be specified by the user. The data frame generated by the Mapper is converted back to raw bytes before it is parsed onto the reducer as input. The raw bytes now contain the structure of the mapper output which contain key value pairs separated by a tab delimiter. \\
+The next step is to specify the Map and Reduce functions for the Mapper and the Reducer. The nice thing here is that our functions are no longer in Java, we can simply write these function using \R{} code to process and compute on the R data object which we have just converted. Each chunk of data will be associated with each Map process. The Mapper takes in theR\ object consisting of values and executes the user defined Map function. The Map function identifies the keys from the values associated with it and generates the output \R{} data frame with the key and value/s separated by a delimiter. The default delimiter is a tab character, however this can also be specified by the user. The data frame generated by the Mapper is converted back to raw bytes before it is parsed onto the reducer as input. The raw bytes now contain the structure of the mapper output which contain key value pairs separated by a tab delimiter. \\
 
-If the Reduce function is not specified, the output will be parsed back to Hadoop HDFS. We will just receive the output of the Mapper which is the shuffle and sorting of the key and its associated values without being reduced/aggregated. If we have specified the Reduce function, the process follows the same process as the Mapper. The Reducer executes the formatter function and parse the data form the Mapper output. Again, it is split into chunks, however this is dependent on how many Reducers we have specified. The number of Reducers will determine the number of chunks which determines the number of files generated output.\\
+If the Reduce function is not specified, the output will be parsed back to Hadoop HDFS. We will just receive the output of the Mapper which is the shuffle and sorting of the key and its associated values without being reduced/aggregated. If we have specified the Reduce function, the process follows the same process as the Mapper. The Reducer executes the formatter function and parse the data from the Mapper output. Again, it is split into chunks, however this is dependent on how many Reducers we have specified. The number of Reducers will determine the number of files generated in the output.\\
 
-Each split of data will be associated with each Reduce process. The Reducer takes in the \R\ object consisting of key-value pairs and executes the user defined Reduce function. The objective is to take all the values that have the same key assigned to a single Reducer which then aggregates/combines the values for that key. The output generated by the Reducer is converted back to raw bytes before it is parsed back to Hadoop and stored in HDFS in a set directory. 
+Each split of data will be associated with each Reduce process. The Reducer takes in the \R{} object consisting of key-value pairs and executes the user defined Reduce function. The objective is to take all the values that have the same key assigned to a single Reducer which then aggregates/combines the values for that key. The output generated by the Reducer is converted back to raw bytes before it is parsed back to Hadoop and stored in HDFS in a set directory. 
 
 \section{Leveraging\pkg{iotools} for Efficiency}
 
-The\pkg{HMR} package is highly efficient as it leverages the\pkg{iotools} package in \R\cite{iotools}. It is a set of tools for quickly importing and processing datasets using any data source. The functions packaged in\pkg{iotools} are comparatively faster than the native functions in \R\  which can be verified through the benchmarks \cite{IO17}.\\
+The\pkg{HMR} package is highly efficient as it leverages the\pkg{iotools} package in \R{}\cite{iotools}. It is a set of tools for quickly importing and processing datasets using any data source. The functions packaged in\pkg{iotools} are comparatively faster than the native functions in \R{} which can be verified through the benchmarks \cite{IO17}.\\
 
-The two functions \code{chunk.reader} and \code{read.chunk} are functions used in the\pkg{HMR} package to read data as multiple lines as opposed to reading line by line sequentially. \code{chunk.reader} reads by default 32MB (as default) from a binary connection and stores it as an \R\ object while preserving the integrity of the lines. \code{chunk.read} then converts this object into a raw vector for each subsequent block of 32MB. By parsing blocks of lines rather than single lines, we are able to achieve higher efficiency for data streaming.\\
+The two functions \code{chunk.reader} and \code{read.chunk} are functions used in the\pkg{HMR} package to read data as multiple lines as opposed to reading line by line sequentially.\\ \code{chunk.reader} creates a reader that will read from a binary connection in chunks while preserving the integrity of the lines. \code{chunk.read} then reads the chunks into \R{} using the specified reader. By parsing blocks of lines rather than single lines, we are able to achieve higher efficiency for data streaming.\\
 
 Other core functions in the\pkg{iotools} package used in the\pkg{HMR} package are \code{mstrsplit} and \code{dstrsplit}. \code{mstrsplit} takes a raw or character vector and converts it into a character matrix according to the separators, while \code{dstrsplit} takes the vector and convert it into a data frame instead. These two functions are primarily used to convert the raw output from the chunk functions into a R object which we will feed into our MapReduce process in \R. These functions are able to minimize the copying of data and avoid the use of intermediate strings to improve performance.\\
 
@@ -409,11 +423,11 @@ The other function we will be leveraging is \code{as.output} which is the revers
 
 In order for us to execute MapReduce jobs, we require a server/cluster with Hadoop set up. The file path/connection defines the HDFS file path and input source.\pkg{HMR} can take two types of input objects: \code{hpath} and \code{hinput}. \code{hpath} only contains the path of the input whereas \code{hinput} has an additional formatter argument which allows the user to specify the formatter function for the Mapper and the Reducer. However, this will require the user to have some familiarity or knowledge of structure of the data. Once the connection is specified, input is read into \R\ using \code{chunk.reader} and \code{chunk.read} from\pkg{iotools}. \\
 
-The current logic allows the user to specify the formatter for both the Mapper and Reducer as a list or the Map or Reduce formatter as a vector. If a single formatter function is specified, the same formatter will be used for both the Map and Reduce process. If no list or vector is specified for the formatter, then\pkg{HMR} defaults to the \code{default.formatter}. The \code{default.formatter} leverages the \code{mstrsplit} function that takes a raw vector which in our case is our data from HDFS and convert it into a matrix with a key and value structure. The key is the first column of the matrix separated from the values by a tab characters, however the values are returned as character types which is undesirable. The downside of this is that "character" data type requires more storage compared to other data types such as logical and integers. Having the incorrect data type also means we will need to convert our values to the correct type before we can compute on it. This can be resolved by converting the data type in our Map and Reduce functions.
+The current logic allows the user to specify the formatter for both the Mapper and Reducer as a list or the Map or Reduce formatter as a vector. If a single formatter function is specified, the same formatter will be used for both the Map and Reduce process. If no list or vector is specified for the formatter, then\pkg{HMR} defaults to the \code{default.formatter}. The \code{default.formatter} leverages the \code{mstrsplit} function that takes a raw vector which in our case is our data from HDFS and convert it into a matrix with a key and value structure. The key is the first column of the matrix separated from the values by a tab character, however the values are returned as character types which is undesirable. The downside of this is that "character" data type requires more storage compared to other data types such as logical and integers. Having the incorrect data type also means we will need to convert our values to the correct type before we can compute on it. This can be resolved by converting the data type in our Map and Reduce functions.
 
 \section{Examples using\pkg{HMR}}
 
-Lets assume we have a directory in HDFS called \texttt{taxi} which contains a large data set of taxicab trips. The records in the data set include fields capturing the pick-up and drop-off dates/times, pick-up and drop-off locations, trip distances, fares, rate types, payment types, and driver-reported passenger counts. Using the\pkg{HMR} package, we will perform some simple calculations on the taxicab data. \\
+Let us assume we have a directory in HDFS called \texttt{taxi} which contains a large data set of taxicab trips. The records in the data set include fields capturing the pick-up and drop-off dates/times, pick-up and drop-off locations, trip distances, fares, rate types, payment types, and driver-reported passenger counts. Using the\pkg{HMR} package, we will perform some simple calculations on the taxicab data. \\
 
 We can access the data in the directory through Unix shell and simple Bash commands.
 
@@ -421,34 +435,46 @@ We can access the data in the directory through Unix shell and simple Bash comma
 hadoop@hdp:~$ hadoop fs -ls taxi
 \end{verbatim}
 
-The following R script streams the MapReduce process through the\pkg{HMR} function in \R\. The script will calculates the number of record for January 2015. The Map function is the shell command for 'word count' where the number of lines are extracted. The script uses the \code{default.formatter} as no formatters have been specified. The \code{default.formatter} reads all data as strings/characters.
+The following \R{} script streams the MapReduce process through the\pkg{HMR} function in \R{}. The script will calculates the number of record for January 2015. The Map function is the shell command for 'word count' where the number of lines are extracted. The script uses the \code{default.formatter} as no formatters have been specified. The \code{default.formatter} reads all data as strings/characters.
 
-\begin{verbatim}
+%\begin{verbatim}
+<<include=FALSE>>=
+hmr <- function(...) invisible(NULL)
+@
+<<results=FALSE>>=
 hmr(hinput("taxi/2015/01"), map="wc -l", reducers=0, wait=FALSE)
-\end{verbatim}
+@
+%\end{verbatim}
 
-The following \R\ script also performs the same line count calculation. However, the formatter has been specified which only include the first 5 fields of the data set. In the formatter argument, we specify either the object or the class type for each of the fields. If NA is specified for a field, then the field will be defined as as logical. Instead of using shell command as the previous script, the Mapper is using a \R\ function \code{nrow} which also calculates the numbers of rows. The difference is that the number of Reducers has been set to 1. This will ensure that the we only receive one output.
+The following \R\ script also performs the same line count calculation. However, the formatter has been specified which only include the first 5 fields of the data set. In the formatter argument, we specify either the object or the class type for each of the fields. If NA is specified for a field, then the field will be be skipped completely. Instead of using shell command as the previous script, the Mapper is using a \R{} function \code{nrow} which also calculates the numbers of rows. The difference is that the number of Reducers has been set to 1. This will ensure that the we only receive one output.
  
-\begin{verbatim}
-hmr(hinput("taxi/2015/01",
-           formatter=function(o) dstrsplit(o, list(vendor=1, NA, NA, 
-           	pass=1, dist=1), sep=",", strict=FALSE)),
+<<>>=
+hmr(hinput("taxi/2015/01", formatter=function(o)
+          dstrsplit(o, list(vendor=1, NA, NA, pass=1, dist=1),
+                    sep=",", strict=FALSE)),
     map=function(d) nrow(d), reducers=1, wait=FALSE)
-\end{verbatim}
+@
 
 The output is saved to a directory in HDFS and can be access with the unix command \texttt{hadoop fs -ls /folder\_name} and printed using \texttt{hadoop fs -cat /folder\_name}. As we did not specify a Reduce function, we return the output of the Mapper which is the row count. Each block of data is assigned to a single Mapper program and this case we have 15 Mappers producing 15 blocks of output. From the output, we can see also see that the data splits appear to be evenly split.
 
 
 \begin{verbatim}
-hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-30397-0831adbdb7fb1e3e/*
-686375	
+hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-30397-0831/*
+861681	
+861691	
 861469	
 861493	
-861503	
+861678	
 861529	
-861574	
-861610	
 861626	
+861503	
+861742	
+861649	
+861652	
+861574	
+861715	
+861610	
+686375
 \end{verbatim}
 
 \section{Motivation for Enhancements}
@@ -470,8 +496,8 @@ We explored how to we can specify the formatter functions in\pkg{HMR} and unders
 This can be achieved if we can using algorithms to infer the data type (class) from the input data to the Mapper and the Reducer. The idea is that we take a sample of the input data and use that to infer the data type for the values/attributes and assign the data types as column types to the formatter function. The formatter function is assigned to the Map/Reduce tasks for converting the data into a usable format. There are two approaches that we can take to infer the data type to automatically detect the formatter function for the Mapper and the Reducer.
 
 \begin{enumerate}
-\item Dynamic approach - generates and executes the formatter function during the Map and Reduce process. Each process will be assigned a unique formatter function.
-\item Static approach - generates the formatter function for the Map and Reduce process obtained ahead of time and then executes the complete MapReduce job. A single Map and function and a single Reduce function is obtained and applied to each of the Mappers and Reducers respectively. 
+\item\textbf{Dynamic approach} - generates and executes the formatter function during the Map and Reduce process. Each process will be assigned a unique formatter function.
+\item\textbf{Static approach} - generates the formatter function for the Map and Reduce process obtained ahead of time and then executes the complete MapReduce job. A single Map and function and a single Reduce function is obtained and applied to each of the Mappers and Reducers respectively. 
 \end{enumerate}
  
 Due to the nature of MapReduce, the Mapper does not have a way to communicate directly with the Reducer. Hence, we motivate the different approaches to detect ahead of time. The two approaches will have their advantages and drawbacks dependent on type of data that we are processing. We will discuss these towards the end of the article.
@@ -494,7 +520,7 @@ To infer the data type for the Reducer is quite difficult as we do not have imme
 
 \subsubsection{Dynamic Approach}
 
-The dynamic approach formats the input data during the Reduce stage. The dynamic approach for the Reducer is similar to the Mapper as it reads the data during the executing of the Reduce phase. The difference for the Reducer is that the input data now contains a key-value structure which the formatter function will need to define. The Reducer reads the raw input data from the Mapper output as a matrix and uses it to infer the data types for each column. The inferred data types are stored in a vector containing the column types for each value/attribute. This vector containing the column types is passed to the formatter function assigned to the Reduce formatter allocated for each Reducer. In our MapReduce job we will have a vector of column types for each Reducer which executes a separate formatter function containing the metadata of our input data depending on the number of Reducers specified. The output of the Reducer retains the key value structure which is converted to raw bytes.
+The dynamic approach formats the input data during the Reduce stage. The dynamic approach for the Reducer is similar to the Mapper as it reads the data during the executing of the Reduce phase. The difference for the Reducer is that the input data now contains a key-value structure which the formatter function will need to define. The Reducer reads the raw input data from the Mapper output as a matrix and uses it to infer the data types for each column. The inferred data types are stored in a vector containing the column types for each value/attribute. This vector containing the column types is passed to the formatter function assigned to the Reduce formatter allocated for each Reducer. In the MapReduce job we will have a vector of column types for each Reducer which executes a separate formatter function containing the metadata of our input data depending on the number of Reducers specified. The output of the Reducer retains the key value structure which is converted to raw bytes.
 
 \subsubsection{Static Approach}
 
@@ -557,10 +583,15 @@ cat(rawToChar(r))
 
 With the dynamic approach, the goal is to read input data stored in raw bytes to a matrix object in \R\ and infer the data type for each column. We create a function in \R\ that is able to process this. We call this function \code{coltypes}. 
 
-\begin{verbatim}
+<<>>=
  coltypes <- function(r, sep=sep, nsep='\t', 
- 	nrowsClasses=25L, header=TRUE) 
- \end{verbatim}
+ 	nrowsClasses=25L, header=TRUE)  {...}
+@
+<<include=FALSE>>=
+guess = function(...) invisible(NULL)
+sep=","; nsep='\t'; header=1; nrowClasses=1
+@
+
 
 The function takes the following inputs:
 
@@ -568,16 +599,16 @@ The function takes the following inputs:
 \item \textbf{r} - input in the form of a raw vector 
 \item \textbf{sep} - separator character
 \item \textbf{nsep} - key separator character
-\item \textbf{nrows} - number of rows
+\item \textbf{nrowClasses} - number of rows used for auto detection
 \item \textbf{header} - whether the input data contains a header as the first line
 \end{itemize}
 
 The first step of \code{coltypes} is to create a matrix from the vector of raw input. We use the function \code{mstrsplit} from\pkg{iotools} to read in the data using the specified inputs to define the structure of the matrix. It is important to note that each field is a character object as we did not specify the data type for each field.
 
-\begin{verbatim}
-subset = mstrsplit(r, sep=sep, nsep=nsep, 
-    			nrows=nrowsClasses, skip=header)
-\end{verbatim}
+<<results=FALSE, warning=FALSE>>=
+subset <- mstrsplit(r, sep=sep, nsep=nsep, 
+    			nrows=nrowClasses, skip=header)
+@ 
 
 The illustration below shows the matrix that is returned from the raw input using \texttt{mstrsplit}. We specify that we want the separator to be comma, tab as key separator, 5 rows and skip the header. We want to always skip the header so it does not appear in our matrix used to infer the data types.
 
@@ -588,10 +619,10 @@ mstrsplit(r, sep=sep, nsep=nsep, nrows=nrowsClasses, skip=header)
 
 The next step is to infer the data types for each column of the matrix which represents the attributes of our data set. Based on the fields in each column, we convert the data type to the appropriate class. This is achieved using the \code{type.convert} function which converts the character object to a logical, integer, numeric, complex or character based on all the rows in the field. The \code{class} function will return the data type of each field and using \code{apply} we return the data type for all the rows in the columns.
 
-\begin{verbatim}
-colClasses = apply(subset, 2, function(x) 
+<<>>=
+colClasses <- apply(subset, 2, function(x) 
     				class(type.convert(x, as.is=TRUE)))	
-\end{verbatim}
+@
 
 The illustration below shows the vector that is created from inferring the data types for each column of the matrix. The output of of the \code{coltypes} function is simply a vector that contains the data type of each field stored in a vector. This output is assigned to the column type in the formatter function assigned to the process (Map or Reduce) it is running. Each individual process will execute the \code{coltypes} function and generate its own formatter function for each chunk of data.
 
@@ -599,29 +630,40 @@ The illustration below shows the vector that is created from inferring the data 
 apply(subset, 2, function(x) class(type.convert(x, as.is=TRUE)))	
 @ 
 
-Each formatter function is defined by a \code{dstrsplit} function from \pkg{iotools}. The \code{dstrsplit} function is ultimately used to convert the full chunk of raw input to a R data frame given the structure of the input. The \code{column\_types} input for the formatter function is the \code{coltypes} function which infers and provides the column type.
+Each formatter function is defined by a \code{dstrsplit} function from \pkg{iotools}. The \code{dstrsplit} function is ultimately used to convert the full chunk of raw input to a R data frame given the structure of the input. The \code{column\_types} input for the formatter function is the \code{coltypes} function which infers and provides the column type. The specifications in the formatter function for the Mapper requires same separator used to infer the data as this is the separator for the input data. \code{sep} is the separator based on the input data. The \code{header} is also removed as we do not want to read the header as the first line. 
 
-The specifications in the formatter function for the Mapper requires same separator used to infer the data as this is the separator for the input data. \code{sep} is the separator based on the input data. The \code{header} is also removed as we do not want to read the header as the first line.
+<<>>=
+map.formatter <- function(x)
+                  dstrsplit(x, col_types=coltypes(x, sep=map.sep), 
+                                 sep=map.sep, skip=TRUE)
+@
 
-\begin{verbatim}
-map.formatter <- function(x) dstrsplit(x, col_types=coltypes(x), 
-          sep=sep, skip=TRUE)
-\end{verbatim}
+The specifications in the formatter function for the Reducer requires the key value pair structure. Hence, we require the key separator to be a tab character. There will be no header in the input to the Reducer hence we do not need to skip the header for inferring the data type as well as the formatter.  Note here that separator for  \code{coltypes} function is now set to the separator for the Reducer whereas the \code{map.formatter} uses the Map separator.
 
-The specifications in the formatter function for the Reducer requires the key value pair structure. Hence, we require the key separator to be a tab character. There will be no header in the input to the Reducer hence we do not need to skip the header for inferring the data type as well as the formatter.
+<<include=FALSE>>=
+pipe = function(x, ...) file("taxi.csv", ...)
+chunksize = 1e6
+map = reduce = function(x) x
+input = subset
+@
 
-\begin{verbatim}
-red.formatter <- function(x) dstrsplit(x, 
-          col_types=coltypes(x, header=FALSE), nsep='\t')
-\end{verbatim}
+<<>>=
+red.formatter <- function(x)
+                  dstrsplit(x, col_types=coltypes(x, header=FALSE, sep="|"), 
+                                nsep='\t')
+@
 
 \subsection{Static Approach}
 
 With the static approach, the goal is to read input data, infer the data type and return a single formatter function for each Mapper and Reducer. We also create a function in R capable of performing this. We call this function \code{guess}. The \code{guess} function is executed ahead of time, in other words prior to the executing of the MapReduce job.
 
-\begin{verbatim}
-guess <- function(path, chunksize, header=TRUE, map) 
-\end{verbatim}
+<<>>=
+guess <- function(path, chunksize, header=TRUE, map, 
+                 map.formatter=attr(input, "formatter")) { ... }
+@
+<<include=FALSE>>=
+guess = function(...) invisible(NULL)
+@
 
 The function takes the following inputs:
 
@@ -630,27 +672,36 @@ The function takes the following inputs:
 \item \textbf{chunksize} - size of the raw input for subsetting
 \item \textbf{header} - whether the input data contains a header as the first line
 \item \textbf{map} - user defined Map function 
-\item \textbf{map.formatter} - this is set to attr(input, "formatter") which checks if the user has specified the formatter for the Mapper
+\item \textbf{map.formatter} - this is set to \code{attr(input, "formatter")} which checks if the user has specified the formatter for the Mapper
 \end{itemize}
 
 The first step in \code{guess} is to create the connection and read the input into R. The connection between HDFS and R is created using the \texttt{pipe} function. 
 
-\begin{verbatim}
+
+<<>>=
 f <- pipe(paste("hadoop fs -cat", shQuote(path)), "rb")
-\end{verbatim}
+@
 
 Then we use \code{chunk.reader} and \code{read.chunk} to read in the data from HDFS as a raw vector. Instead of taking the first 25 rows of each chunk, the static approach takes by default 1 million bytes of input data from the top and use that to infer the column types. As \code{chunk.reader} has the ability to preserve the row records hence we do not need to worry about where the last row ends.
 
-\begin{verbatim}
+<<include=FALSE>>=
+coltypes <- function(r, sep=",", nsep='\t',
+                       nrowsClasses=25L, chunksize=size, header=TRUE) {
+      subset = mstrsplit(r, sep=sep, nsep=nsep, nrows=nrowsClasses, skip=header)
+      apply(subset, 2, function(x) class(type.convert(x, as.is=TRUE)))
+  }
+  map.sep=","; red.sep="|"
+@
+<<>>=
 cr <- chunk.reader(f)
 r <- read.chunk(cr, chunksize)
-\end{verbatim}
+@
 
 Then we execute the \code{coltypes} function on the subset raw vector to output the vector containing the data types for each column.
 
-\begin{verbatim}
+<<>>=
 colClasses = coltypes(r)
-\end{verbatim}
+@
 
 The static approaches leverages the \code{coltypes} function to output the vector ahead of time. This way we only generate one output which is executed across each chunk of data associated with each process. 
 
@@ -658,46 +709,45 @@ The static approaches leverages the \code{coltypes} function to output the vecto
 coltypes(r)
 @ 
 
-The static approach proceeds to check if the Map function is provided depending on whether we require auto detection for the Reduce formatter. If we do then the Map process is executed on the subset data where where \code{sep} is the separator based on the input data. The output are the intermediate key-values which is store in a data frame called \code{m}.
+The static approach proceeds to check if the Map formatter is provided. If the Map formatter is not provided by the user, then \code{guess} will detect the Map formatter using the column types obtained prior. The map process is executed on the subset data using the Map formatter.  The \code{sep} is the separator based on the Map separator. The output are the intermediate key-values which is store in a data frame called \code{m}.
 
-\begin{verbatim}
-m = map(dstrsplit(r, col_type=colClasses, sep=sep, skip=header))
-\end{verbatim}
+<<>>=
+m = map(dstrsplit(r, col_type=colClasses, sep=map.sep, skip=header))
+@
 
-In order to execute the \code{coltypes} function on the Mapper output, it needs to be converted back to raw bytes using \code{as.output}. This output is used to infer the column types for the Reduce formatter. A sanity check is applied to the column types vector to check that the length of the vector matches the columns of the Mapper output. The headers of the Mapper output are preserved by assigning the names of the Mapper output to the inferred vector of column types. This feature allows the user to specify the names of the values in the Reducer function.
+In order to execute the \code{coltypes} function for the Reducer input, it needs to be converted back to raw bytes using \code{as.output}. This output is used to infer the column types for the Reduce formatter. A sanity check is applied to the column types vector to check that the length of the vector matches the columns of the Mapper output. The headers of the Mapper output are preserved by assigning the names of the Mapper output to the inferred vector of column types. This feature allows the user to specify the names of the values in the Reducer function.
 
-\begin{verbatim}
+<<>>=
 c = coltypes(as.output(m), header=FALSE)
 if (length(c) == length(names(m)))
          names(c) = names(m)
-\end{verbatim}
+@
 
-Given that the Reducer is specified in the job, the \code{guess} function will output the formatter function for both the Mapper and the Reducer. The column types for the Mapper formatter will be taken from \code{colClasses} which was inferred on the Mapper input, whereas the the column types for the Reduce formatter will be taken from the vector object \code{c} which was inferred on the Mapper output/Reducer input. In the Map formatter, we use the separator from the input data in HDFS whereas in the Reduce formatter, the key is separated from the values with a tab and the values are separated with a vertical bar. \\
+Given that the Reducer is specified in the job, the \code{guess} function will output the formatter function for both the Mapper and the Reducer. The column types for the Mapper formatter will be taken from \code{colClasses} which was inferred on the Mapper input, whereas the the column types for the Reduce formatter will be taken from the vector object \code{c} which was inferred on the Mapper output/Reducer input. In the Map formatter, we use the separator from the input data in HDFS whereas in the Reduce formatter, the key is separated from the values with a tab and the values are separated with a pipe separator. \\
  
 The argument in the \code{guess} function includes \code{map.formatter} equal to \code{attr(input, "formatter"))}. This argument checks whether the \code{map.formatter} is specified by the user or not. If it is not specified, then \code{guess} will perform the static approach to infer both the Map and the Reduce formatter shown below.
 
-\begin{verbatim}
-if (is.null(map.formatter)) 
-     list(map=function(x) dstrsplit(x, col_type=colClasses, 
-                            sep=",", skip=header), 
-     reduce=function(x) dstrsplit(x, col_type=c, sep="|", 
+<<results=FALSE>>=
+list(map=function(x) dstrsplit(x, col_type=colClasses, 
+                            sep=map.sep, skip=header), 
+     reduce=function(x) dstrsplit(x, col_type=c, sep=red.sep, 
                             nsep="\t", skip=FALSE))
 
-\end{verbatim}
+@
 
-We also have a practical use case where the user wish to write their own Map formatter and infer the Reduce formatter using the static approach. In this case attributes in \code{map.formatter} is set from \code{attr(input, "formatter"))} in \code{hinput} where the user defined the formatter function. Then the \code{guess} function will return the user specified formatter for the Mapper and the static formatter for the Reducer shown below.
+We also have a practical use case where the user wishes to write their own Map formatter and infer the Reduce formatter using the static approach. In this case attributes in \code{map.formatter} is set from \code{attr(input, "formatter"))} in \code{hinput} where the user defined the formatter function. Then the \code{guess} function will return the user specified formatter for the Mapper and the static formatter for the Reducer shown below.
 
-\begin{verbatim}
+<<results=FALSE>>=
 list(map=attr(input, "formatter"))
-      reduce=function(x) dstrsplit(x, col_type=c, sep="|", 
+      reduce=function(x) dstrsplit(x, col_type=c, sep=red.sep, 
                             nsep="\t", skip=FALSE)
-\end{verbatim}
+@
 
 If the Reduce function is not specified in the job, only one formatter function will be returned shown below where sep is the separator based on the input data. This is the static formatter for the Mapper.
 
-\begin{verbatim}
+<<results=FALSE>>=
 function(x) dstrsplit(x, col_type=colClasses, sep=sep, skip=header)
-\end{verbatim}
+@
 
 The complete functions for the dynamic and static approach can be found in the \code{hmr} source code from \pkg{hmrtest}. \\
 
@@ -705,11 +755,14 @@ The complete functions for the dynamic and static approach can be found in the \
 
 \section{Formatter Logic}
 
-Let us now examine the logic for both the Mapper and the Reducer. The following diagram applies to the Mapper and the Reducer separately.\\
+Let us now examine the logic for both the Mapper and the Reducer. Figure \ref{fig:hs} illustrates the logic for setting the input formatter. The diagram defines the selection process for the Mapper and the Reducer independently.\\
 
-\begin{center}
-\includegraphics[width=15cm]{logic.pdf}\\
-\end{center}
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{logic.pdf}\\
+\caption{logic for formatter selection}
+\label{fig:fm}
+\end{figure}
 
 There are three conditions in the formatter logic that determines which formatter will be executed. 
 
@@ -720,47 +773,47 @@ There are three conditions in the formatter logic that determines which formatte
 
 \subsection{Dynamic Formatter Logic}
 
-When the dynamic approach is selected in\pkg{HMR}, we expect two auto formatter functions for the Mapper and the Reducer given that the Reduce job has been specified. The dynamic formatters are predefined code which takes the inferred vector of column types as the input argument. There is the case when the user wish to specify the Map formatter manually and auto detect the Reduce formatter. In that case, the \code{map.formatter} takes the user input formatter as the Map formatter. \\
+When the dynamic approach is selected in\pkg{HMR}, we expect two auto formatter functions for the Mapper and the Reducer given that the Reduce job has been specified. The dynamic formatters are predefined code which takes the inferred vector of column types as the input argument. There is the case when the user wishes to specify the Map formatter manually and auto detect the Reduce formatter. In that case, the \code{map.formatter} takes the user input formatter as the Map formatter. \\
 
 The Map formatter is specified using the code below. \code{col\_types} is assigned to the inferred vector of column types, \code{sep} is an argument in\pkg{HMR} which the user specifies as the separator for the input data structure and \code{skip} is to skip the first line containing the headers.
 
-\begin{verbatim}
-if (inherits(input, "hinput")) {
-       map.formatter <- attr(input, "formatter")
-}
-else map.formatter <- function(x) dstrsplit(x, 
-        col_types=coltypes(x), sep=sep, skip=TRUE)
-\end{verbatim}
+<<>>=
+map.formatter <- if (inherits(input, "hinput")) {
+     attr(input, "formatter")
+} else 
+     function(x) dstrsplit(x, 
+        col_types=coltypes(x), sep=map.sep, skip=TRUE)
+@
 
 If the Reduce process is specified, the Reduce formatter will take the following code. As we have a key-value structure, the key separator \code{nsep} is set to the tab character.
 
-\begin{verbatim}
+<<>>=
 if (!missing(reduce))
       red.formatter <- function(x) dstrsplit(x, 
-          col_types=coltypes(x, header=FALSE), nsep='\t')
-\end{verbatim}
+          col_types=coltypes(x, header=FALSE, sep=red.sep), nsep='\t')
+@
 
 \subsection{Static Formatter Logic}
 
 When the dynamic approach is selected in\pkg{HMR}, we also expect two auto formatter functions for the Mapper and the Reducer given that the Reduce job has been specified. The static formatters are predefined in the logic which executes the \code{guess} function which executes the Mapper process on a subset and returns the corresponding formatter functions for both processes. \\
 
-If the Reduce process is not specified, the static approach will generate the formatter function for the Mapper only. It takes the code below which executes the \code{guess} function without the Map process. This returns a single formatter for the Map process. For simplicity, all files that belong to the data are stored in the same input directory, hence we read all the files using the regular expression "*".
+If the Reduce process is not specified, the static approach will generate the formatter function for the Mapper only. It takes the code below which executes the \code{guess} function without the Map process. This returns a single formatter for the Map process. For simplicity, all files that belong to the data are stored in the same input directory, hence we read all the files using the glob pattern "*".
 
-\begin{verbatim}
+<<>>=
 map.formatter <- guess(paste0(input,"/*"))
-\end{verbatim}
+@
+r
+If the Reduce process is specified, both the Reduce and Map formatter will be generated from the following code. The \code{guess} function is executed with the map function assigned to \code{map}. This allows the Map process to be executed on the subset used to infer the column types for the Reduce formatter. The output of \code{guess} with the \code{map} argument results in a list of two formatter functions for both the Mapper and the Reducer. The formatter function for the Mapper is allocated to the \code{map.formatter} and likewise the Reduce formatter is assigned to the \code{red.formatter}. 
 
-If the Reduce process is specified, both the Reduce and Map formatter will be generated from the following code. The \code{guess} function is executed with the map function assigned to \code{map}. This allows the Map process to be executed on the subset used to infer the column types for to write the Reduce formatter. The output of \code{guess} with the \code{map} argument results in a list of two formatter functions for both the Mapper and the Reducer. The formatter function for the Mapper is allocated to the \code{map.formatter} and likewise the Reduce formatter is assigned to the \code{red.formatter}. 
-
-\begin{verbatim}
+<<>>=
 if (!missing(reduce)) {
     formatter <- guess(paste0(input,"/*"), map=map)
     map.formatter <- formatter$map
     red.formatter <- formatter$reduce
 }
-\end{verbatim}
+@
 
-There is also the case when the user wish to specify the Map formatter manually and auto detect the Reduce formatter. In that case, the \code{map.formatter} takes the user input formatter. This logic is taken care of in the \code{guess} function discussed earlier with \code{map.formatter} taking the attributes of the user defined formatter \code{attr(input, "formatter"))}. \\
+There is also the case when the user wishes to specify the Map formatter manually and auto detect the Reduce formatter. In that case, the \code{map.formatter} takes the user input formatter. This logic is taken care of in the \code{guess} function discussed earlier with \code{map.formatter} taking the attribute of the user defined formatter \code{attr(input, "formatter"))}. \\
 
 The complete formatter logic can also be found in the \code{hmr} source code from \pkg{hmrtest}.
 
@@ -770,65 +823,102 @@ We will now look at some a few examples of how to code MapReduce program using t
 
 The first example below performs the dynamic approach for both the Mappers and the Reducers as \code{auto.formatter} is set to \code{TRUE}. The Map function assigns the rows of the data chunk to a user created key "A" and the Reduce function sums the the values associated with the key "A". Notice here that we do not need to specify the data type in the reduce function as this is taken care of in the Reduce formatter function as the column types have been inferred already. However, we need to specify the the summation is on the second element which contains the values. One Reducer is specify which generates one output file.
 
-\begin{verbatim}
+<<>>=
 hmr(hpath("taxi/2015/01"), auto.formatter=TRUE,
     map=function(d) c(A=nrow(d)),
     reduce=function(o) sum(o[[2]]),
     reducers=1, wait=FALSE)
-\end{verbatim}
+@
 
 We can perform the same calculation as above, however this time we manually set the Map formatter and execute the static Reduce formatter by setting \code{auto.formatter} to \code{FALSE}. 
 
-\begin{verbatim}
+<<>>=
 hmr(hinput("taxi/2015/01", 
            formatter=dstrsplit(o, list(vendor=1,NA,NA,pass=1,dist=1), 
-     sep=",", strict=FALSE)), 
+             sep=",", strict=FALSE)), 
     auto.formatter=FALSE,
     map=function(d) c(A=nrow(d)),
     reduce=function(o) sum(as.numeric(o)),
     reducers=1, wait=FALSE)
-\end{verbatim}
+@
 
 Both scripts yield the same results consisting of the total rows summed together. The number of taxicab trips in January 2015 is 12,748,927.
 
 \begin{verbatim}
-hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-28546-06d862903785090a/*
+hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-28546-06d8/*
 12748927	
 \end{verbatim}
 
-In the next example we look at the total number of trips across the two different vendors in January 2015. We use the dynamic approach for both Mappers and Reducers by setting \code{auto.formatter} to \code{TRUE}. The Map function generates a table for count for the first element of the input data which is the vendor and the Reduce function sums the values in the second element associated with the key in the first element. One Reducer is specified which generates one output file.
+In the next example we look at the total passenger count across the two different vendors in January 2015. We first use the dynamic approach for both Mappers and Reducers by setting \code{auto.formatter} to \code{TRUE}. The Map function generates a R data frame with with three specified columns 4, 5 and 1 where 1 is the key \code{VendorID}.  The Reduce function sums up the second element \code{passenger\_count} from the Map output across \code{VendorID} which is the always called \code{rowindex}. Note that the third element \code{trip\_distance} refers to the fifth element in the Map function, but it is not used in the Reduce process. Two Reducer are specified which generates two output files.
 
-\begin{verbatim}
+%     map=function(d) { add.keys = function(d, keys) { attr(d, "output.keys") = as.character(keys); d } ; add.keys(d[,4:5], d$vid) }
+
+<<>>= 
 hmr(hpath("taxi/2015/01"), auto.formatter=TRUE,
-    map=function(d) table(d[[1]]),
-    reduce=function(o) tapply(o[[2]], o[[1]], sum),
-    reducers=1, wait=FALSE)
+    map=function(d) { add.keys = function(d, keys) { 
+                       attr(d, "output.keys") = as.character(keys); d }
+         add.keys(d[,4:5], d[[1]]) },
+    reduce=function(d) tapply(d[[2]], d$rowindex, sum),
+    reducers=2, wait=FALSE)
+@
+
+We can perform the same calculation as above, however this time we set the static formatter by setting \code{auto.formatter} to \code{FALSE}. Notice here that instead of specifying the elements, we can specify the names instead. The names we use are \code{VendorID}, \code{passenger\_count} and \code{trip\_distance}.
+
+<<>>=
+hmr(hpath("taxi/2015/01"), auto.formatter=FALSE,
+    map=function(d) { add.keys = function(d, keys) {
+                     attr(d, "output.keys") = as.character(keys); d }
+        add.keys(d[,c("passenger_count", "trip_distance")], d$VendorID) },
+    reduce=function(d) tapply(d$passenger_count, d$rowindex, sum),
+    reducers=2, wait=FALSE)
+@
+
+Both scripts yield the same results consisting of the the total passenger count for each vendor. The total number of passengers in January 2015 for Vendor 1 is 
+7,710,722 and 13,726,493 for Vendor 2.
+
+\begin{verbatim}
+hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-28546-e243/*
+1	7710722
+2	13726493
 \end{verbatim}
 
-We can perform the same calculation as above, however this time we set the static formatter both the Mappers and Reducers by setting \code{auto.formatter} to \code{FALSE}. Notice here that instead of specifying the element location, we can specify the headers instead. 
+\pagebreak
 
+For the last example, we look at a more complicated algorithm with a larger set. The path now contains the full year of 2015. The script calculates count of taxi pick-ups and drop-off at zip locations in New York. The Map function matches the zipcodes with longititude and latitude of the locations using table count. The Reduce function sums up the counts associated with each zip location. The dynamic approach is executed and 4 reducers are specified for the job as well as specified paths to store the output data.
+
+
+
+
+<<>>=
+## pick up location
+hmr(hpath("taxi/2015/??"), auto.formatter=TRUE,
+    hpath("taxi-zips-p"), wait=FALSE, reducers=4, overwrite=TRUE,
+    aux = list(shp=shp),
+    map = function(m) table(fastshp::inside(shp, m[,6], m[,7])),
+    reduce = function(m) ctapply(m[[2]], m[[1]], sum))
+
+## drop off location
+hmr(hpath("taxi/2015/??"), auto.formatter=TRUE,
+    hpath("taxi-zips-d"), wait=FALSE, reducers=4, overwrite=TRUE,
+    aux = list(shp=shp),
+    map = function(m) table(fastshp::inside(shp, m[,10], m[,11])),
+    reduce = function(m) ctapply(m[[2]], m[[1]], sum))
+@
+
+For simplicity, only the first few rows of the pick-up locations are shown. The keys on the left are the zipcodes and the values on the right are the counts.
 
 \begin{verbatim}
-hmr(hpath("taxi/2015/01"), auto.formatter=FALSE,
-    map=function(d) table(d$VendorID),
-    reduce=function(o) tapply(o[[2]], o[[1]], sum),
-    reducers=1, wait=FALSE)
-\end{verbatim} 
-
-
-\begin{verbatim}
-hadoop@hdp:~$ hadoop fs -cat /tmp/io-hmr-temp-28546-e2436c428e783e8f/*
-1	6101156
-2	6647771
-\end{verbatim}
-
-For the last example, we look at a slightly more complicated calculation. This job calculates the total number of passengers across each Vendor. We use the static approach for both Mappers and Reducers by setting \code{auto.formatter} to \code{FALSE}. Two Reducer are specified which generates two output file.
-
-\begin{verbatim}
-hmr(hpath("taxi/2015/01"), auto.formatter=FALSE,
-    map=function(d) c(d$vendor, d$passenger_count),
-    reduce=function(o) tapply(o[[2]], o[[1]], function(x) round(mean(x), 2),
-                              reducers=2, wait=FALSE))
+hadoop fs -cat taxi-zips-p/part-00000 | head
+10	       4
+1000	     2548
+1008	     3
+1022	     4
+1026	     2
+104	      520885
+1048	     228
+1055	     11
+1059	     1
+1066	     1
 \end{verbatim}
 
 \chapter{Discussions and Future Directions}
@@ -851,10 +941,9 @@ If the subset data from static approach turns out to be empty or contains descri
 
 The issue around missing/empty values in the subset is addressed in the dynamic approach as each chunk will generate a unique formatter. Although we expect that each individual split holds the same structure and data type, in the case where there may be differences including missing data, we can still rely on the dynamic approach to run successfully and generate an output. 
 
-
 \section{Further Directions}
 
-We have focused on the formatters which reads data as the standard input from one source to another. In our case, we specifically focus on the input formatter of the Map and Reduce programs in \R. For future directions, we can also look at different methods of structuring the data for the output of the Mapper and Reducer. \\
+We have focused on the formatters which read data as the standard input from one source to another. In our case, we specifically focus on the input formatter of the Map and Reduce programs in \R. For future directions, we can also look at different methods of structuring the data for the output of the Mapper and Reducer. \\
 
 Currently we leverage the \code{as.output} from \pkg{iotools} which preserves the \R\ object as a raw vector, however the headers do not get preserved. As \code{as.output} is a generic function, this allows us to write methods for outputting different formats. We can look at outputting the results of the Mappers and Reducers with a format that encode meta information in each record. By doing so, we may be able to address some of the limitations listed above. For example, the column names and other meta information could be preserved using JSON by including the column names for each record row. Although we are addressing this issue, the result will be a notable increase in verbosity as headers tend to be larger than the data itself. 
 
